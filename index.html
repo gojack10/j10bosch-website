@@ -38,6 +38,18 @@
 
         nav a {
             margin: 0 1rem;
+            font-size: 1rem;
+        }
+
+        hr {
+            width: 100%;
+            margin: 2rem auto;
+            border: none;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        hr.nav-divider {
+            margin: 1rem auto;
         }
 
         h1 {
@@ -52,12 +64,16 @@
         }
 
         .social-links {
-            margin-top: 4rem;
+            margin-top: 1rem;
         }
 
         .social-links a {
             margin: 0 0.5rem;
             font-size: 0.9rem;
+        }
+
+        hr.social-divider {
+            margin-bottom: 2.5rem;
         }
 
         @media (max-width: 600px) {
@@ -75,11 +91,13 @@
 <body>
     <header>
         <h1>Jack ten Bosch</h1>
+        <hr class="nav-divider">
         <nav>
             <a href="/blog">blog</a>
             <a href="/projects">projects</a>
             <a href="/photography">photography</a>
         </nav>
+        <hr class="nav-divider">
     </header>
 
     <main>
@@ -88,6 +106,7 @@
         <p>If you want to get in touch with me, <a href="mailto:gojack10@gmail.com">email</a> is best :)</p>
     </main>
 
+    <hr class="social-divider">
     <footer class="social-links">
         <a href="https://github.com/gojack10">GitHub</a> •
         <a href="https://linkedin.com/in/j10bosch/">LinkedIn</a>
