@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name</title>
+    <style>
+        :root {
+            --text-color: rgba(255, 255, 255, 0.9);
+            --background: rgb(30, 30, 46);
+            --link-color: rgb(95, 231, 82);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-color);
+            font-family: "Iosevka Comfy Duo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        nav {
+            margin: 2rem 0;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        nav a {
+            margin: 0 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 2rem 0;
+            color: var(--text-color);
+        }
+
+        p {
+            margin: 1.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .social-links {
+            margin-top: 4rem;
+        }
+
+        .social-links a {
+            margin: 0 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            nav a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Jack ten Bosch</h1>
+        <nav>
+            <a href="/blog">blog</a>
+            <a href="/projects">projects</a>
+            <a href="/photography">photography</a>
+        </nav>
+    </header>
+
+    <main>
+        <p>Hello, I'm Jack (yes, my legal name is John ten Bosch Jr., but I prefer Jack because who doesn't love watching people's confused faces when they see my real name - plus it's what I've been called since I was a kid).</p>
+        <p>I'm a Business Analytics major, an athlete, and a data/computer nerd (I use Arch btw) currently living in San Francisco.</p>
+        <p>If you want to get in touch with me, <a href="mailto:gojack10@gmail.com">email</a> is best :)</p>
+    </main>
+
+    <footer class="social-links">
+        <a href="https://github.com/gojack10">GitHub</a> •
+        <a href="https://linkedin.com/in/j10bosch/">LinkedIn</a>
+    </footer>
+</body>
+</html>
