@@ -1,0 +1,101 @@
+:root {
+    --text-color: rgba(255, 255, 255, 0.9);
+    --background: rgb(30, 30, 46);
+    --link-color: rgb(95, 231, 82);
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text-color);
+    font-family: "Iosevka Comfy Duo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+nav {
+    margin: 2rem 0;
+}
+
+a, a:visited, a:active {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    opacity: 1;
+    text-decoration: underline;
+    color: var(--link-color);
+}
+
+nav a {
+    margin: 0 1rem;
+    font-size: 1rem;
+}
+
+hr {
+    width: 100%;
+    margin: 2rem auto;
+    border: none;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+hr.nav-divider {
+    margin: 1rem auto;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin: 2rem 0;
+    color: var(--text-color);
+}
+
+p {
+    margin: 1.5rem 0;
+    font-size: 1.2rem;
+}
+
+.social-links {
+    margin-top: 1rem;
+}
+
+.social-links a {
+    margin: 0 0.5rem;
+    font-size: 0.9rem;
+}
+
+hr.social-divider {
+    margin-bottom: 2.5rem;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 1rem;
+    }
+    
+    nav a {
+        display: block;
+        margin: 0.5rem 0;
+    }
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.logo:hover {
+    color: var(--link-color);
+    text-decoration: underline;
+}
