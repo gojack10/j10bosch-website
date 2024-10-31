@@ -32,8 +32,11 @@ a:hover {
 }
 
 nav a {
-    margin: 0 1rem;
     font-size: 1rem;
+}
+
+.navbar a:not(.logo) {
+    margin: 0;
 }
 
 hr {
@@ -86,6 +89,14 @@ hr.social-divider {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.nav-links {
+    display: inline-block;
+}
+
+.nav-links a {
+    margin: 0 4px;
 }
 
 .logo {
