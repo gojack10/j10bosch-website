@@ -5,39 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jack ten Bosch</title>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Update MathJax configuration -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            svg: {
-                fontCache: 'global'
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax initial typeset complete');
-                    });
-                }
-            }
-        };
-    </script>
     <script async src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    
-    <!-- Load Prism.js -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-    
-    <!-- Load md-block last -->
-    <script async type="module" src="https://md-block.verou.me/md-block.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <header>
@@ -51,55 +20,64 @@
     </header>
 
     <main>
-        <md-block markers="*_~`">
-# CustomerScope: RFM Analytics & Strategic Segmentation
+        <h1>CustomerScope: RFM Analytics & Strategic Segmentation</h1>
 
-# [View on GitHub](https://github.com/gojack10/CustomerScope-R)
+        <h1><a href="https://github.com/gojack10/CustomerScope-R">View on GitHub</a></h1>
 
-A comprehensive e-commerce customer segmentation analysis using RFM (Recency, Frequency, Monetary) metrics and advanced clustering techniques. This project analyzes customer purchasing behavior to identify distinct customer segments and provide actionable marketing insights.
+        <p>A comprehensive e-commerce customer segmentation analysis using RFM (Recency, Frequency, Monetary) metrics and advanced clustering techniques. This project analyzes customer purchasing behavior to identify distinct customer segments and provide actionable marketing insights.</p>
 
-# Paper: E-commerce Customer Segmentation Analysis Using RFM and Advanced Clustering Techniques
+        <h1>Paper: E-commerce Customer Segmentation Analysis Using RFM and Advanced Clustering Techniques</h1>
 
-Copyright © 2024 John ten Bosch Jr. All rights reserved.
+        <p>Copyright © 2024 John ten Bosch Jr. All rights reserved.</p>
 
-**Author:** John ten Bosch Jr.
-**Affiliation:** Business Analytics, San Francisco State University  
-**Contact:** gojack10@gmail.com
+        <p><strong>Author:</strong> John ten Bosch Jr.<br>
+        <strong>Affiliation:</strong> Business Analytics, San Francisco State University<br>
+        <strong>Contact:</strong> gojack10@gmail.com</p>
 
-## Abstract
-This study presents a comprehensive analysis of customer segmentation in e-commerce using RFM (Recency, Frequency, Monetary) analysis and advanced clustering techniques. Using a dataset from the UCI Machine Learning Repository, we implemented K-means clustering to identify distinct customer segments and developed a systematic approach for customer behavior analysis. Our findings reveal four primary customer clusters with distinct characteristics, providing actionable insights for targeted marketing strategies and customer relationship management.
+        <h2>Abstract</h2>
+        <p>This study presents a comprehensive analysis of customer segmentation in e-commerce using RFM (Recency, Frequency, Monetary) analysis and advanced clustering techniques. Using a dataset from the UCI Machine Learning Repository, we implemented K-means clustering to identify distinct customer segments and developed a systematic approach for customer behavior analysis. Our findings reveal four primary customer clusters with distinct characteristics, providing actionable insights for targeted marketing strategies and customer relationship management.</p>
 
-## I. Introduction
-In today's competitive e-commerce landscape, understanding customer behavior and effectively segmenting customers has become crucial for business success. Customer segmentation in e-commerce involves dividing the customer base into distinct groups based on shared characteristics such as purchasing behavior, demographics, browsing patterns, and lifetime value. This segmentation enables businesses to:
-- Tailor marketing strategies to specific customer groups
-- Optimize product recommendations
-- Customize user experiences based on segment characteristics
-- Improve conversion rates and customer retention
-- Enhance average order value through personalized approaches
+        <h2>I. Introduction</h2>
+        <p>In today's competitive e-commerce landscape, understanding customer behavior and effectively segmenting customers has become crucial for business success. Customer segmentation in e-commerce involves dividing the customer base into distinct groups based on shared characteristics such as purchasing behavior, demographics, browsing patterns, and lifetime value. This segmentation enables businesses to:</p>
+        <ul>
+            <li>Tailor marketing strategies to specific customer groups</li>
+            <li>Optimize product recommendations</li>
+            <li>Customize user experiences based on segment characteristics</li>
+            <li>Improve conversion rates and customer retention</li>
+            <li>Enhance average order value through personalized approaches</li>
+        </ul>
+        <p>The importance of data-driven decision-making in this context cannot be overstated, as it allows businesses to move beyond intuition-based strategies to measurable, empirical approaches.</p>
 
-The importance of data-driven decision-making in this context cannot be overstated, as it allows businesses to move beyond intuition-based strategies to measurable, empirical approaches.
+        <h2>II. Methodology</h2>
 
-## II. Methodology
+        <h3>A. Data Preparation</h3>
+        <p>The study utilized the online retail dataset from the UCI Machine Learning Repository. The data preparation process involved several key steps:</p>
 
-### A. Data Preparation
-The study utilized the online retail dataset from the UCI Machine Learning Repository. The data preparation process involved several key steps:
+        <ol>
+            <li>Data Cleaning:
+                <ul>
+                    <li>Removal of missing values</li>
+                    <li>Elimination of negative quantities and prices</li>
+                    <li>Conversion of invoice dates to proper datetime format</li>
+                    <li>Filtering of invalid customer IDs</li>
+                </ul>
+            </li>
+            <li>Feature Engineering:
+                <ul>
+                    <li>Implementation of RFM metrics:
+                        <ul>
+                            <li>Recency: Days since last purchase</li>
+                            <li>Frequency: Number of distinct purchases</li>
+                            <li>Monetary: Total amount spent</li>
+                        </ul>
+                    </li>
+                    <li>Scaling of RFM values for clustering accuracy</li>
+                </ul>
+            </li>
+        </ol>
 
-1. Data Cleaning:
-   - Removal of missing values
-   - Elimination of negative quantities and prices
-   - Conversion of invoice dates to proper datetime format
-   - Filtering of invalid customer IDs
-
-2. Feature Engineering:
-   - Implementation of RFM metrics:
-     - Recency: Days since last purchase
-     - Frequency: Number of distinct purchases
-     - Monetary: Total amount spent
-   - Scaling of RFM values for clustering accuracy
-
-The RFM features are calculated using the following approach:
-```R
-rfm_data <- clean_retail_data %>%
+        <p>The RFM features are calculated using the following approach:</p>
+        <pre><code class="language-r">rfm_data <- clean_retail_data %>%
   group_by(CustomerID) %>%
   summarise(
     # Recency: days since last purchase
@@ -110,227 +88,287 @@ rfm_data <- clean_retail_data %>%
     Monetary = sum(Quantity * UnitPrice)
   ) %>%
   # Remove any rows where CustomerID is NA
-  filter(!is.na(CustomerID))
-```
+  filter(!is.na(CustomerID))</code></pre>
 
-Mathematically, this can be expressed as:
+        <p>Mathematically, this can be expressed as:</p>
 
-$$R_i = max(Date) - max(Date_i)$$
-$$F_i = |distinct(InvoiceNo_i)|$$
-$$M_i = \sum_{j=1}^{n_i} (Quantity_{ij} \cdot UnitPrice_{ij})$$
+        <p>\[R_i = max(Date) - max(Date_i)\]
+        \[F_i = |distinct(InvoiceNo_i)|\]
+        \[M_i = \sum_{j=1}^{n_i} (Quantity_{ij} \cdot UnitPrice_{ij})\]</p>
 
-Where:
-- \(R_i\) is the recency for customer \(i\)
-- \(F_i\) is the frequency for customer \(i\)
-- \(M_i\) is the monetary value for customer \(i\)
-- \(n_i\) is the number of transactions for customer \(i\)
+        <p>Where:</p>
+        <ul>
+            <li>\(R_i\) is the recency for customer \(i\)</li>
+            <li>\(F_i\) is the frequency for customer \(i\)</li>
+            <li>\(M_i\) is the monetary value for customer \(i\)</li>
+            <li>\(n_i\) is the number of transactions for customer \(i\)</li>
+        </ul>
 
-### B. Clustering Algorithms and Initial Analysis
+        <h3>B. Clustering Algorithms and Initial Analysis</h3>
 
-![RFM Distributions](media/plots/rfm_distributions.png)
+        <img src="media/plots/rfm_distributions.png" alt="RFM Distributions">
 
-The initial analysis of RFM metrics revealed distinct patterns in customer behavior:
+        <p>The initial analysis of RFM metrics revealed distinct patterns in customer behavior:</p>
 
-1. Frequency Distribution:
-   - Highly left-skewed distribution
-   - Majority of customers with low purchase frequency (<50 purchases)
-   - Small subset of highly frequent purchasers
+        <ol>
+            <li>Frequency Distribution:
+                <ul>
+                    <li>Highly left-skewed distribution</li>
+                    <li>Majority of customers with low purchase frequency (&lt;50 purchases)</li>
+                    <li>Small subset of highly frequent purchasers</li>
+                </ul>
+            </li>
+            <li>Monetary Distribution:
+                <ul>
+                    <li>Extreme left-skew with long tail</li>
+                    <li>Most customers in lower spending brackets</li>
+                    <li>Few high-value outliers representing major revenue contributors</li>
+                </ul>
+            </li>
+            <li>Recency Distribution:
+                <ul>
+                    <li>More uniform distribution compared to other metrics</li>
+                    <li>Gradual decline in customer counts with increasing recency</li>
+                    <li>Notable long tail indicating potential churn risks</li>
+                </ul>
+            </li>
+        </ol>
 
-2. Monetary Distribution:
-   - Extreme left-skew with long tail
-   - Most customers in lower spending brackets
-   - Few high-value outliers representing major revenue contributors
+        <p>The k-means clustering algorithm minimizes the following objective function:</p>
 
-3. Recency Distribution:
-   - More uniform distribution compared to other metrics
-   - Gradual decline in customer counts with increasing recency
-   - Notable long tail indicating potential churn risks
+        <p>\[J = \sum_{i=1}^{n} \sum_{j=1}^{k} w_{ij} ||x_i - \mu_j||^2\]</p>
 
-The k-means clustering algorithm minimizes the following objective function:
+        <p>Where:</p>
+        <ul>
+            <li>\(J\) is the objective function to minimize</li>
+            <li>\(n\) is the number of data points</li>
+            <li>\(k\) is the number of clusters</li>
+            <li>\(w_{ij}\) is 1 if point \(i\) belongs to cluster \(j\), 0 otherwise</li>
+            <li>\(x_i\) is the feature vector for point \(i\)</li>
+            <li>\(µ_j\) is the centroid of cluster \(j\)</li>
+        </ul>
 
-$$J = \sum_{i=1}^{n} \sum_{j=1}^{k} w_{ij} ||x_i - \mu_j||^2$$
-
-Where:
-- \(J\) is the objective function to minimize
-- \(n\) is the number of data points
-- \(k\) is the number of clusters
-- \(w_{ij}\) is 1 if point \(i\) belongs to cluster \(j\), 0 otherwise
-- \(x_i\) is the feature vector for point \(i\)
-- \(µ_j\) is the centroid of cluster \(j\)
-
-```R
-# k-means clustering with optimal k
+        <pre><code class="language-r"># k-means clustering with optimal k
 optimal_k <- 4
 final_clusters <- kmeans(rfm_scaled, centers = optimal_k, nstart = 25)
 
 rfm_clustered <- rfm_data %>%
-  mutate(Cluster = factor(final_clusters$cluster))
-```
+  mutate(Cluster = factor(final_clusters$cluster))</code></pre>
 
-The optimal number of clusters was determined through two complementary methods:
+        <p>The optimal number of clusters was determined through two complementary methods:</p>
 
-![Silhouette Plot](media/plots/silhouette_plot.png)
+        <img src="media/plots/silhouette_plot.png" alt="Silhouette Plot">
 
-1. Silhouette Analysis:
-   - Highest score at k=2 (0.89)
-   - Notable drop after k=4 (0.62)
-   - Diminishing returns beyond k=4
-   - Supports selection of 4 clusters for balance between granularity and cohesion
+        <ol>
+            <li>Silhouette Analysis:
+                <ul>
+                    <li>Highest score at k=2 (0.89)</li>
+                    <li>Notable drop after k=4 (0.62)</li>
+                    <li>Diminishing returns beyond k=4</li>
+                    <li>Supports selection of 4 clusters for balance between granularity and cohesion</li>
+                </ul>
+            </li>
+        </ol>
 
-![Elbow Plot](media/plots/elbow_plot.png)
+        <img src="media/plots/elbow_plot.png" alt="Elbow Plot">
 
-2. Elbow Method:
-   - Sharp decline in within-cluster sum of squares until k=4
-   - Flattening of curve after k=4
-   - Confirms optimal cluster count of 4
-   - Additional clusters provide minimal reduction in variance
+        <ol start="2">
+            <li>Elbow Method:
+                <ul>
+                    <li>Sharp decline in within-cluster sum of squares until k=4</li>
+                    <li>Flattening of curve after k=4</li>
+                    <li>Confirms optimal cluster count of 4</li>
+                    <li>Additional clusters provide minimal reduction in variance</li>
+                </ul>
+            </li>
+        </ol>
 
-## III. Results Analysis
+        <h2>III. Results Analysis</h2>
 
-### A. Segment Profiling
+        <h3>A. Segment Profiling</h3>
 
-![Cluster Summary](media/plots/cluster_summary.png)
+        <img src="media/plots/cluster_summary.png" alt="Cluster Summary">
 
-The analysis revealed four distinct clusters with unique characteristics:
+        <p>The analysis revealed four distinct clusters with unique characteristics:</p>
 
-1. Cluster 3 (Potential Loyalists):
-   - Size: 3,060 customers (70.54%)
-   - Average Recency: 43.43 days
-   - Average Frequency: 3.68 purchases
-   - Average Monetary Value: $1,358.17
-   - Moderate RFM scores (R: 3.51, F: 3.22, M: 3.20)
+        <ol>
+            <li>Cluster 3 (Potential Loyalists):
+                <ul>
+                    <li>Size: 3,060 customers (70.54%)</li>
+                    <li>Average Recency: 43.43 days</li>
+                    <li>Average Frequency: 3.68 purchases</li>
+                    <li>Average Monetary Value: $1,358.17</li>
+                    <li>Moderate RFM scores (R: 3.51, F: 3.22, M: 3.20)</li>
+                </ul>
+            </li>
+            <li>Cluster 1 (Average Customers):
+                <ul>
+                    <li>Size: 1,061 customers (24.46%)</li>
+                    <li>Average Recency: 248.17 days</li>
+                    <li>Average Frequency: 1.55 purchases</li>
+                    <li>Average Monetary Value: $478.19</li>
+                    <li>Lower RFM scores (R: 1.19, F: 1.98, M: 2.01)</li>
+                </ul>
+            </li>
+            <li>Cluster 4 (Champions):
+                <ul>
+                    <li>Size: 204 customers (4.70%)</li>
+                    <li>Average Recency: 14.96 days</li>
+                    <li>Average Frequency: 22.33 purchases</li>
+                    <li>Average Monetary Value: $12,709.09</li>
+                    <li>High RFM scores (R: 4.62, F: 4.96, M: 4.99)</li>
+                </ul>
+            </li>
+            <li>Cluster 2 (VIP Customers):
+                <ul>
+                    <li>Size: 13 customers (0.30%)</li>
+                    <li>Average Recency: 6.62 days</li>
+                    <li>Average Frequency: 82.54 purchases</li>
+                    <li>Average Monetary Value: $127,338.31</li>
+                    <li>Highest RFM scores (R: 4.77, F: 4.85, M: 5.00)</li>
+                </ul>
+            </li>
+        </ol>
 
-2. Cluster 1 (Average Customers):
-   - Size: 1,061 customers (24.46%)
-   - Average Recency: 248.17 days
-   - Average Frequency: 1.55 purchases
-   - Average Monetary Value: $478.19
-   - Lower RFM scores (R: 1.19, F: 1.98, M: 2.01)
+        <h3>B. Detailed Value Distribution Analysis</h3>
 
-3. Cluster 4 (Champions):
-   - Size: 204 customers (4.70%)
-   - Average Recency: 14.96 days
-   - Average Frequency: 22.33 purchases
-   - Average Monetary Value: $12,709.09
-   - High RFM scores (R: 4.62, F: 4.96, M: 4.99)
+        <img src="media/plots/boxplot_monetary_by_cluster.png" alt="Boxplot Monetary by Cluster">
 
-4. Cluster 2 (VIP Customers):
-   - Size: 13 customers (0.30%)
-   - Average Recency: 6.62 days
-   - Average Frequency: 82.54 purchases
-   - Average Monetary Value: $127,338.31
-   - Highest RFM scores (R: 4.77, F: 4.85, M: 5.00)
+        <p>The monetary value distribution across clusters reveals distinct spending patterns:</p>
 
-### B. Detailed Value Distribution Analysis
+        <ol>
+            <li>VIP Customers (Cluster 2):
+                <ul>
+                    <li>Highest median monetary value (~85,000)</li>
+                    <li>Substantial interquartile range (45,000-130,000)</li>
+                    <li>Notable outliers exceeding 200,000</li>
+                    <li>Clear separation from other clusters</li>
+                </ul>
+            </li>
+            <li>Champions (Cluster 4):
+                <ul>
+                    <li>Moderate monetary values (median ~15,000)</li>
+                    <li>Compact distribution with some high-value outliers</li>
+                    <li>Consistent spending patterns</li>
+                </ul>
+            </li>
+            <li>Average & Potential Loyalists (Clusters 1 & 3):
+                <ul>
+                    <li>Similar monetary distributions</li>
+                    <li>Lower median values (&lt;5,000)</li>
+                    <li>Minimal variance in spending</li>
+                    <li>Occasional outliers indicating growth potential</li>
+                </ul>
+            </li>
+        </ol>
 
-![Boxplot Monetary by Cluster](media/plots/boxplot_monetary_by_cluster.png)
+        <h4>Recency Patterns</h4>
 
-The monetary value distribution across clusters reveals distinct spending patterns:
+        <img src="media/plots/histogram_recency_by_cluster.png" alt="Histogram Recency by Cluster">
 
-1. VIP Customers (Cluster 2):
-   - Highest median monetary value (~85,000)
-   - Substantial interquartile range (45,000-130,000)
-   - Notable outliers exceeding 200,000
-   - Clear separation from other clusters
+        <p>The recency distribution highlights engagement patterns:</p>
 
-2. Champions (Cluster 4):
-   - Moderate monetary values (median ~15,000)
-   - Compact distribution with some high-value outliers
-   - Consistent spending patterns
+        <ol>
+            <li>Recent Engagement:
+                <ul>
+                    <li>Clusters 1 & 3 show high concentration in 0-50 day range</li>
+                    <li>Clear peak in very recent activity (&lt;30 days)</li>
+                    <li>Strong active customer base</li>
+                </ul>
+            </li>
+            <li>Temporal Distribution:
+                <ul>
+                    <li>Cluster 3 shows even distribution across time periods</li>
+                    <li>Cluster 1 concentrated in recent periods</li>
+                    <li>Long tail extending to 350+ days</li>
+                    <li>Natural segmentation points at 100 and 200 days</li>
+                </ul>
+            </li>
+        </ol>
 
-3. Average & Potential Loyalists (Clusters 1 & 3):
-   - Similar monetary distributions
-   - Lower median values (<5,000)
-   - Minimal variance in spending
-   - Occasional outliers indicating growth potential
+        <h4>Value-Frequency Relationship</h4>
 
-#### Recency Patterns
+        <img src="media/plots/scatter_frequency_vs_monetary.png" alt="Scatter Frequency vs Monetary">
 
-![Histogram Recency by Cluster](media/plots/histogram_recency_by_cluster.png)
+        <p>The relationship between purchase frequency and monetary value reveals:</p>
 
-The recency distribution highlights engagement patterns:
+        <ol>
+            <li>Cluster Characteristics:
+                <ul>
+                    <li>Cluster 2: High frequency and high value, clear outliers</li>
+                    <li>Cluster 4: Moderate frequency, consistent value</li>
+                    <li>Cluster 3: Low to moderate frequency, variable value</li>
+                    <li>Cluster 1: Low frequency, low value concentration</li>
+                </ul>
+            </li>
+        </ol>
 
-1. Recent Engagement:
-   - Clusters 1 & 3 show high concentration in 0-50 day range
-   - Clear peak in very recent activity (<30 days)
-   - Strong active customer base
+        <h3>C. Churn Risk Analysis</h3>
 
-2. Temporal Distribution:
-   - Cluster 3 shows even distribution across time periods
-   - Cluster 1 concentrated in recent periods
-   - Long tail extending to 350+ days
-   - Natural segmentation points at 100 and 200 days
+        <img src="media/plots/churn_heatmap.png" alt="Churn Heatmap">
 
-#### Value-Frequency Relationship
+        <p>The study implemented a comprehensive churn risk assessment framework that revealed distinct patterns:</p>
 
-![Scatter Frequency vs Monetary](media/plots/scatter_frequency_vs_monetary.png)
+        <p>For the churn risk analysis, we calculate an engagement score:</p>
 
-The relationship between purchase frequency and monetary value reveals:
-
-1. Cluster Characteristics:
-   - Cluster 2: High frequency and high value, clear outliers
-   - Cluster 4: Moderate frequency, consistent value
-   - Cluster 3: Low to moderate frequency, variable value
-   - Cluster 1: Low frequency, low value concentration
-
-### C. Churn Risk Analysis
-
-![Churn Heatmap](media/plots/churn_heatmap.png)
-
-The study implemented a comprehensive churn risk assessment framework that revealed distinct patterns:
-
-For the churn risk analysis, we calculate an engagement score:
-
-```R
-    Engagement_Score = (
+        <pre><code class="language-r">    Engagement_Score = (
       scale(Frequency) + 
       scale(Monetary) + 
       scale(-Recency)
-    ) / 3
-```
+    ) / 3</code></pre>
 
-Mathematically represented as:
+        <p>Mathematically represented as:</p>
 
-$$E_i = \frac{Z(F_i) + Z(M_i) - Z(R_i)}{3}$$
+        <p>\[E_i = \frac{Z(F_i) + Z(M_i) - Z(R_i)}{3}\]</p>
 
-Where:
-- \(E_i\) is the engagement score for customer \(i\)
-- \(Z()\) is the standardization function
-- \(F_i\), \(M_i\), and \(R_i\) are the frequency, monetary, and recency values respectively
+        <p>Where:</p>
+        <ul>
+            <li>\(E_i\) is the engagement score for customer \(i\)</li>
+            <li>\(Z()\) is the standardization function</li>
+            <li>\(F_i\), \(M_i\), and \(R_i\) are the frequency, monetary, and recency values respectively</li>
+        </ul>
 
-1. Active Customers:
-   - Maintain consistently low churn probability (<20%)
-   - Show regular engagement patterns
-   - Demonstrate stable purchasing behavior
+        <ol>
+            <li>Active Customers:
+                <ul>
+                    <li>Maintain consistently low churn probability (&lt;20%)</li>
+                    <li>Show regular engagement patterns</li>
+                    <li>Demonstrate stable purchasing behavior</li>
+                </ul>
+            </li>
+            <li>High-Risk Segment:
+                <ul>
+                    <li>Display nearly 100% churn probability</li>
+                    <li>Typically inactive for &gt;150 days and have low or no purchases</li>
+                    <li>Sharp transition point around 150-day mark</li>
+                    <li>Clear separation from active customer base</li>
+                </ul>
+            </li>
+        </ol>
 
-2. High-Risk Segment:
-   - Display nearly 100% churn probability
-   - Typically inactive for >150 days and have low or no purchases
-   - Sharp transition point around 150-day mark
-   - Clear separation from active customer base
+        <img src="media/plots/recency_vs_churn.png" alt="Recency vs Churn">
 
-![Recency vs Churn](media/plots/recency_vs_churn.png)
+        <p>Further analysis of transaction patterns reveals clear clustering of high-risk customers in the low-frequency zone, while active customers show varied transaction frequencies with clear stratification between risk levels.</p>
 
-Further analysis of transaction patterns reveals clear clustering of high-risk customers in the low-frequency zone, while active customers show varied transaction frequencies with clear stratification between risk levels.
+        <h3>D. Time Series Analysis and Forecasting</h3>
 
-### D. Time Series Analysis and Forecasting
+        <img src="media/plots/sales_forecast_prophet.png" alt="Sales Forecast Prophet">
 
-![Sales Forecast Prophet](media/plots/sales_forecast_prophet.png)
+        <p>The Prophet forecasting model revealed several key insights:</p>
 
-The Prophet forecasting model revealed several key insights:
+        <p>For the time series forecasting, we use Prophet's additive model:</p>
 
-For the time series forecasting, we use Prophet's additive model:
+        <p>\[y(t) = g(t) + s(t) + h(t) + \epsilon_t\]</p>
 
-$$y(t) = g(t) + s(t) + h(t) + \epsilon_t$$
+        <p>Where:</p>
+        <ul>
+            <li>\(g(t)\) is the trend function</li>
+            <li>\(s(t)\) is the seasonal component</li>
+            <li>\(h(t)\) is the holiday component</li>
+            <li>\(\epsilon_t\) is the error term</li>
+        </ul>
 
-Where:
-- \(g(t)\) is the trend function
-- \(s(t)\) is the seasonal component
-- \(h(t)\) is the holiday component
-- \(\epsilon_t\) is the error term
-
-```R
-prophet_model <- prophet(
+        <pre><code class="language-r">prophet_model <- prophet(
   monthly_sales_clean,
   growth = 'linear',
   yearly.seasonality = FALSE,
@@ -339,131 +377,113 @@ prophet_model <- prophet(
   seasonality.mode = 'additive',
   changepoint.prior.scale = 0.01,
   n.changepoints = 2
-)
-```
+)</code></pre>
 
-1. Historical Trend Analysis:
-   - Significant volatility in actual sales from January 2011 to July 2011
-   - Notable dip in sales during April 2011
-   - Strong upward trajectory beginning in October 2011
-   - Overall increasing trend despite monthly fluctuations
+        <ol>
+            <li>Historical Trend Analysis:
+                <ul>
+                    <li>Significant volatility in actual sales from January 2011 to July 2011</li>
+                    <li>Notable dip in sales during April 2011</li>
+                    <li>Strong upward trajectory beginning in October 2011</li>
+                    <li>Overall increasing trend despite monthly fluctuations</li>
+                </ul>
+            </li>
+            <li>Forecast Trend:
+                <ul>
+                    <li>Linear growth projection extending into early 2012</li>
+                    <li>Baseline trend showing steady increase from approximately 400,000 to over 1,000,000 in sales</li>
+                    <li>Conservative growth estimate compared to recent historical spikes</li>
+                    <li>Reduced sensitivity to short-term fluctuations</li>
+                </ul>
+            </li>
+        </ol>
 
-2. Forecast Trend:
-   - Linear growth projection extending into early 2012
-   - Baseline trend showing steady increase from approximately 400,000 to over 1,000,000 in sales
-   - Conservative growth estimate compared to recent historical spikes
-   - Reduced sensitivity to short-term fluctuations
+        <h2>IV. Business Implications and Strategic Recommendations</h2>
 
-## IV. Business Implications and Strategic Recommendations
+        <p>Based on the comprehensive analysis, we recommend the following segment-specific strategies:</p>
 
-Based on the comprehensive analysis, we recommend the following segment-specific strategies:
+        <ol>
+            <li>VIP Customers (Cluster 2):
+                <ul>
+                    <li>VIP program development</li>
+                    <li>Early access to new products</li>
+                    <li>Personalized service offerings</li>
+                    <li>High-touch relationship management</li>
+                </ul>
+            </li>
+            <li>Champions (Cluster 4):
+                <ul>
+                    <li>Upgrade path to elite status</li>
+                    <li>Loyalty rewards optimization</li>
+                    <li>Cross-selling campaigns</li>
+                    <li>Engagement maintenance programs</li>
+                </ul>
+            </li>
+            <li>Potential Loyalists (Cluster 3):
+                <ul>
+                    <li>Frequency boost initiatives</li>
+                    <li>Value-added services</li>
+                    <li>Category expansion</li>
+                    <li>Targeted promotional campaigns</li>
+                </ul>
+            </li>
+            <li>Average Customers (Cluster 1):
+                <ul>
+                    <li>Activation campaigns</li>
+                    <li>Entry-level loyalty programs</li>
+                    <li>Educational content</li>
+                    <li>Basic engagement initiatives</li>
+                </ul>
+            </li>
+        </ol>
 
-1. VIP Customers (Cluster 2):
-   - VIP program development
-   - Early access to new products
-   - Personalized service offerings
-   - High-touch relationship management
+        <h2>V. Implementation Framework</h2>
 
-2. Champions (Cluster 4):
-   - Upgrade path to elite status
-   - Loyalty rewards optimization
-   - Cross-selling campaigns
-   - Engagement maintenance programs
+        <p>The study developed a comprehensive dashboard solution for practical application:</p>
 
-3. Potential Loyalists (Cluster 3):
-   - Frequency boost initiatives
-   - Value-added services
-   - Category expansion
-   - Targeted promotional campaigns
+        <ol>
+            <li>Dashboard Components:
+                <ul>
+                    <li>Overview metrics</li>
+                    <li>Cluster analysis</li>
+                    <li>Time series analysis</li>
+                    <li>Churn risk assessment</li>
+                    <li>Customer details</li>
+                </ul>
+            </li>
+            <li>Technical Features:
+                <ul>
+                    <li>Interactive filtering</li>
+                    <li>Real-time visualization</li>
+                    <li>Responsive design</li>
+                    <li>Modular architecture</li>
+                </ul>
+            </li>
+        </ol>
 
-4. Average Customers (Cluster 1):
-   - Activation campaigns
-   - Entry-level loyalty programs
-   - Educational content
-   - Basic engagement initiatives
+        <h2>VI. Conclusion</h2>
 
-## V. Implementation Framework
+        <p>This study demonstrates the effectiveness of RFM-based clustering for e-commerce customer segmentation. The identified segments provide a clear framework for targeted marketing strategies and customer relationship management. The analysis reveals clear distinctions between customer segments and provides actionable insights for business strategy.</p>
 
-The study developed a comprehensive dashboard solution for practical application:
+        <h3>Practical Applications</h3>
+        <ul>
+            <li>Improved customer targeting</li>
+            <li>Enhanced resource allocation</li>
+            <li>More effective retention strategies</li>
+            <li>Personalized marketing campaigns</li>
+        </ul>
 
-1. Dashboard Components:
-   - Overview metrics
-   - Cluster analysis
-   - Time series analysis
-   - Churn risk assessment
-   - Customer details
+        <h3>Future Research Recommendations</h3>
+        <ol>
+            <li>Integration of additional behavioral metrics</li>
+            <li>Longitudinal analysis of segment stability</li>
+            <li>Investigation of cross-channel behavior patterns</li>
+            <li>Development of predictive models for segment transitions</li>
+        </ol>
 
-2. Technical Features:
-   - Interactive filtering
-   - Real-time visualization
-   - Responsive design
-   - Modular architecture
+        <h2>References</h2>
 
-## VI. Conclusion
-
-This study demonstrates the effectiveness of RFM-based clustering for e-commerce customer segmentation. The identified segments provide a clear framework for targeted marketing strategies and customer relationship management. The analysis reveals clear distinctions between customer segments and provides actionable insights for business strategy.
-
-### Practical Applications
-- Improved customer targeting
-- Enhanced resource allocation
-- More effective retention strategies
-- Personalized marketing campaigns
-
-### Future Research Recommendations
-1. Integration of additional behavioral metrics
-2. Longitudinal analysis of segment stability
-3. Investigation of cross-channel behavior patterns
-4. Development of predictive models for segment transitions
-
-## References
-
-Chen, D. (2015). Online Retail Data Set. UCI Machine Learning Repository. https://archive.ics.uci.edu/dataset/352/online+retail. https://doi.org/10.24432/C5BW33
-        </md-block>
+        <p>Chen, D. (2015). Online Retail Data Set. UCI Machine Learning Repository. <a href="https://archive.ics.uci.edu/dataset/352/online+retail">https://archive.ics.uci.edu/dataset/352/online+retail</a>. <a href="https://doi.org/10.24432/C5BW33">https://doi.org/10.24432/C5BW33</a></p>
     </main>
-
-    <script>
-        // Initialize with retry mechanism
-        function initializeWithRetry(maxAttempts = 10, interval = 100) {
-            let attempts = 0;
-            
-            function tryInitialize() {
-                if (attempts >= maxAttempts) {
-                    console.warn('Max initialization attempts reached');
-                    return;
-                }
-                
-                attempts++;
-                
-                // Check if all required libraries are loaded
-                if (typeof Prism !== 'undefined' && 
-                    window.MathJax && 
-                    MathJax.typeset) {
-                    
-                    // Highlight code blocks
-                    Prism.highlightAll();
-                    
-                    // Process math
-                    MathJax.typeset();
-                    
-                    console.log('Successfully initialized all components');
-                } else {
-                    // Try again after interval
-                    setTimeout(tryInitialize, interval);
-                }
-            }
-            
-            tryInitialize();
-        }
-
-        // Run on initial load
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeWithRetry();
-        });
-
-        // Run when md-block content changes
-        document.addEventListener('md-block-rendered', () => {
-            initializeWithRetry();
-        });
-    </script>
-  </body>
-  </html>
+</body>
+</html>
