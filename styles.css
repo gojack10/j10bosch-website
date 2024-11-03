@@ -178,7 +178,6 @@ nav a, .nav-links a {
     color: var(--link-color);
     text-decoration: none;
     padding: 10px;
-    border-bottom: 1px solid var(--hover-background);
 }
 
 .project-section a:last-child {
@@ -520,4 +519,36 @@ code {
     opacity: 0.8;
     transform: translateY(0);
   }
+}
+
+.project-item {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-item a {
+    color: var(--link-color);
+    text-decoration: none;
+    background: none;
+    padding: 0;
+}
+
+.project-item a:hover {
+    text-decoration: underline;
+    background: none;
+}
+
+.last-modified {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.project-section a:hover {
+    background-color: transparent;
 }
