@@ -2,17 +2,24 @@
     --text-color: rgba(255, 255, 255, 0.9);
     --background: rgb(30, 30, 46);
     --link-color: rgb(95, 231, 82);
+    --border-color: rgba(255, 255, 255, 0.2);
+    --hover-background: rgba(255, 255, 255, 0.05);
+}
+
+html, body {
+    background-color: var(--background);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    background-color: var(--background);
-    color: var(--text-color);
     font-family: "Iosevka Comfy Duo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.6;
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
-    text-align: center;
+    text-align: left;
 }
 
 nav {
@@ -43,7 +50,7 @@ hr {
     width: 100%;
     margin: 2rem auto;
     border: none;
-    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid var(--border-color);
 }
 
 hr.nav-divider {
@@ -59,19 +66,6 @@ h1 {
 p {
     margin: 1.5rem 0;
     font-size: 1.2rem;
-}
-
-.social-links {
-    margin-top: 1rem;
-}
-
-.social-links a {
-    margin: 0 0.5rem;
-    font-size: 0.9rem;
-}
-
-hr.social-divider {
-    margin-bottom: 2.5rem;
 }
 
 @media (max-width: 600px) {
@@ -109,4 +103,49 @@ hr.social-divider {
 .logo:hover {
     color: var(--link-color);
     text-decoration: underline;
+}
+
+.project-section {
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.project-section h2 {
+    color: var(--text-color);
+    font-weight: normal;
+    margin: 0;
+    padding: 10px;
+    background-color: var(--hover-background);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.project-section a {
+    display: block;
+    color: var(--link-color);
+    text-decoration: none;
+    padding: 10px;
+    border-bottom: 1px solid var(--hover-background);
+}
+
+.project-section a:last-child {
+    border-bottom: none;
+}
+
+.project-section a:hover {
+    background-color: var(--hover-background);
+}
+
+.social-links {
+    text-align: center;
+}
+
+.index-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.index-content p {
+    margin: 1.5rem auto;
 }
