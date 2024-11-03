@@ -16,6 +16,13 @@
             },
             svg: {
                 fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax initial typeset complete');
+                    });
+                }
             }
         };
     </script>
@@ -415,14 +422,47 @@ Chen, D. (2015). Online Retail Data Set. UCI Machine Learning Repository. https:
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            // Re-run Prism highlighting
-            Prism.highlightAll();
+        // Initialize with retry mechanism
+        function initializeWithRetry(maxAttempts = 10, interval = 100) {
+            let attempts = 0;
             
-            // Re-run MathJax processing
-            if (window.MathJax && MathJax.typeset) {
-                MathJax.typeset();
+            function tryInitialize() {
+                if (attempts >= maxAttempts) {
+                    console.warn('Max initialization attempts reached');
+                    return;
+                }
+                
+                attempts++;
+                
+                // Check if all required libraries are loaded
+                if (typeof Prism !== 'undefined' && 
+                    window.MathJax && 
+                    MathJax.typeset) {
+                    
+                    // Highlight code blocks
+                    Prism.highlightAll();
+                    
+                    // Process math
+                    MathJax.typeset();
+                    
+                    console.log('Successfully initialized all components');
+                } else {
+                    // Try again after interval
+                    setTimeout(tryInitialize, interval);
+                }
             }
+            
+            tryInitialize();
+        }
+
+        // Run on initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeWithRetry();
+        });
+
+        // Run when md-block content changes
+        document.addEventListener('md-block-rendered', () => {
+            initializeWithRetry();
         });
     </script>
   </body>

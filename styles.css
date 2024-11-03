@@ -161,3 +161,34 @@ pre[class*="language-"] {
     margin: 1.5em 0;
     border-radius: 4px;
 }
+
+/* Add these new rules */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em auto;
+    /* Remove contain: size as it's causing rendering issues */
+    /* Add better hardware acceleration */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Add loading indicator */
+md-block:not(:defined) {
+    display: block;
+    position: relative;
+    min-height: 100px;
+}
+
+md-block:not(:defined)::after {
+    content: "Loading...";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #666;
+}
