@@ -162,6 +162,7 @@ nav a, .nav-links a {
     margin-top: 20px;
     border: 1px solid var(--border-color);
     text-align: left;
+    background-color: var(--background);
 }
 
 .project-section h2 {
@@ -174,7 +175,9 @@ nav a, .nav-links a {
 }
 
 .project-section a {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     color: var(--link-color);
     text-decoration: none;
     padding: 10px;
@@ -186,6 +189,7 @@ nav a, .nav-links a {
 
 .project-section a:hover {
     background-color: var(--hover-background);
+    text-decoration: none;
 }
 
 .social-links {
@@ -547,8 +551,5 @@ code {
 .last-modified {
     font-size: 0.9em;
     color: rgba(255, 255, 255, 0.5);
-}
-
-.project-section a:hover {
-    background-color: transparent;
+    margin-left: 1em;
 }
