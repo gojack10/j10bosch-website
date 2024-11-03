@@ -180,15 +180,35 @@ img {
 md-block:not(:defined) {
     display: block;
     position: relative;
-    min-height: 100px;
+    min-height: 300px;
+    background: var(--background);
+    visibility: hidden;
 }
 
 md-block:not(:defined)::after {
     content: "Loading...";
+    visibility: visible;
     display: block;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #666;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+/* Show content once defined */
+md-block:defined {
+    visibility: visible;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
