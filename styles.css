@@ -163,6 +163,8 @@ nav a, .nav-links a {
     border: 1px solid var(--border-color);
     text-align: left;
     background-color: var(--background);
+    display: flex;
+    flex-direction: column;
 }
 
 .project-section h2 {
@@ -530,6 +532,7 @@ code {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    order: -1; /* Ensures newer items appear first */
 }
 
 .project-item:last-child {
