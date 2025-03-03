@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude 3.7 Agent Rampages, and Why Magic Isn't Always Good</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Favicon configuration -->
+  <link rel="icon" type="image/png" href="media/favicon/favicon-32x32.png">
+  <style>
+    .code-container {
+      position: relative;
+      margin: 20px 0;
+    }
+    
+    .code-block {
+      background-color: #1a1b26;
+      color: #c0caf5;
+      padding: 20px;
+      padding-top: 30px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      display: block;
+      position: relative;
+    }
+    
+    .code-line {
+      display: block;
+      padding-left: 0;
+    }
+    
+    .code-line.indented {
+      padding-left: 2em;
+    }
+    
+    .copy-button {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 1;
+    }
+    
+    .copy-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .centered-text {
+      text-align: center;
+      margin-top: 10px;
+    }
+    
+    /* Notification styles */
+    .clipboard-notification {
+      position: fixed;
+      top: 20px;
+      right: -300px; /* Start off-screen */
+      background-color: #1a1b26;
+      color: #ffffff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: right 0.3s ease-in-out;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .clipboard-notification.show {
+      right: 20px;
+    }
+    
+    .clipboard-notification-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-color: var(--link-color);
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .clipboard-notification-icon::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 3px;
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid #1a1b26;
+      border-bottom: 2px solid #1a1b26;
+      transform: rotate(-45deg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Clipboard notification element -->
+  <div class="clipboard-notification" id="clipboard-notification">
+    <span class="clipboard-notification-icon"></span>
+    <span>Copied to your clipboard</span>
+  </div>
+
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">Jack ten Bosch</a>
+      <div class="nav-links">
+         <a href="blogs.html">blog</a> - <a href="projects.html">projects</a> - <a href="photography.html">photography</a>
+      </div>
+    </nav>
+    <hr class="nav-divider">
+  </header>
+  <main>
+    <article class="blog-post">
+      <h1>Claude 3.7 Agent Rampages, and Why Magic Isn't Always Good</h1>
+      <p>I've been experimenting lately with the newest Claude 3.7 update through Cursor, and let me tell you, it's impressive—extremely impressive. The code it generates has a certain elegance and refinement that, dare I say, feels like it has taste. But here's the catch. Claude's "agent mode" sometimes acts like an overeager intern, going off on a relentless task-completing rampage.</p>
+      
+      <p>You hand Claude a task, and instead of simply solving it, Claude eagerly takes charge, jumping from one fix to another, endlessly declaring, "Next up, this. Oh, and this too!" It keeps marching forward, determinedly fixing everything in sight, until your carefully planned project structure becomes unrecognizably tangled. Thankfully, my intermediate Python knowledge allowed me to step in and stop Claude from wreaking too much havoc. But if I hadn't caught it early, untangling its enthusiastic fixes would have been extremely annoying and time consuming.</p>
+      
+      <p>This situation reminded me of a meme I saw once, featuring a caveman captioned, "If nothing magically works, nothing magically breaks"</p>
+      
+      <p><img src="media/blogs/blog2-cursor3.7/caveman.png" alt="Caveman meme" style="max-width:500px;"></p>
+      
+      <p class="centered-text">(thank you to @htmx_org for this piece of art)</p>
+      
+      <p>Profound, right? There's real wisdom here. When you deeply understand how your project works, you'll immediately know what's broken, why it's broken, and how to fix it. But when something just magically "works," without your understanding why, troubleshooting suddenly feels 10 million times harder.</p>
+      
+      <p>This is exactly why good prompting is essential. If you have a clear vision of your project's architecture and behavior, you can guide the AI effectively, aligning its output more closely with your intentions. The more context and structure you provide, the more accurately models like Claude can predict your desired outcomes.</p>
+      
+      <p>Despite Claude's occasional task rampages, with careful prompting, its troubleshooting capabilities can be nothing short of phenomenal. Issues that once took me days to debug now resolve themselves in just a couple of hours. Here's a prompt template I swear by when debugging (shoutout to Ted Werbel @tedx_ai for this awesome debugging prompt):</p>
+      
+      <div class="code-container">
+        <div class="code-block">
+          <span class="code-line">Reflect on 5–7 different possible sources of the problem, distill those down to 1–2 most likely sources, and then add logs to validate your assumptions before we move onto implementing the actual code fix</span>
+          <button class="copy-button" onclick="copyCode(this.parentElement)">Copy</button>
+        </div>
+      </div>
+      
+      <p>(Pro-tip: Always double-check for residual Claude-generated files afterward. Trust me.)</p>
+      
+      <p>Above all, treat your projects like your children—know everything about them. The more intimately you understand every component, the easier you'll debug, iterate, and grow your projects. Right now, I'm knee-deep in a database barrier for a future product, studying advanced structures and learning graph databases (send help!). Don't be afraid to lean on AI as a study partner when tackling fundamentals or tricky subjects. LLMs aren't just for generating code; providing context about your project while studying can significantly clarify concepts and accelerate your understanding.</p>
+      
+      <p>Old me would've plowed through blindly, relying heavily on AI to patch things up as I went along. But now, a slightly wiser Jack knows that slowing down and mastering fundamentals, especially at critical structural points, pays off enormously. Sure, it may feel slower in the beginning, but future me will be endlessly grateful for the solid foundation. Because remember: If nothing magically works, nothing magically goes wrong.</p>
+    </article>
+  </main>
+  <footer>
+    <p>&copy; 2025 Jack ten Bosch. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function copyCode(element) {
+      const codeBlock = element.querySelector('.code-line') || element;
+      const textToCopy = codeBlock.textContent;
+      const button = element.querySelector('.copy-button') || element;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        // Change button text to "Done!"
+        const originalText = button.textContent;
+        button.textContent = 'Done!';
+        
+        // Show notification
+        const notification = document.getElementById('clipboard-notification');
+        notification.classList.add('show');
+        
+        // Hide notification after 2 seconds
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 2000);
+        
+        // Reset button text after 2 seconds
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  </script>
+</body>
+</html> 
