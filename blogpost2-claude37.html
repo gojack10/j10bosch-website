@@ -101,6 +101,32 @@
       border-bottom: 2px solid #1a1b26;
       transform: rotate(-45deg);
     }
+    
+    /* Twitter/X handle styling */
+    .twitter-handle {
+      color: var(--link-color);
+      text-decoration: none;
+      position: relative;
+      white-space: nowrap;
+    }
+    
+    .twitter-handle:hover {
+      text-decoration: underline;
+    }
+    
+    .twitter-handle::before {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231DA1F2'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+      margin-right: 2px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
   </style>
 </head>
 <body>
@@ -130,13 +156,13 @@
       
       <p><img src="media/blogs/blog2-cursor3.7/caveman.png" alt="Caveman meme" style="max-width:500px;"></p>
       
-      <p class="centered-text">(thank you to @htmx_org for this piece of art)</p>
+      <p class="centered-text">(thank you to <a href="https://x.com/htmx_org" class="twitter-handle">@htmx_org</a> for this piece of art)</p>
       
       <p>Profound, right? There's real wisdom here. When you deeply understand how your project works, you'll immediately know what's broken, why it's broken, and how to fix it. But when something just magically "works," without your understanding why, troubleshooting suddenly feels 10 million times harder.</p>
       
       <p>This is exactly why good prompting is essential. If you have a clear vision of your project's architecture and behavior, you can guide the AI effectively, aligning its output more closely with your intentions. The more context and structure you provide, the more accurately models like Claude can predict your desired outcomes.</p>
       
-      <p>Despite Claude's occasional task rampages, with careful prompting, its troubleshooting capabilities can be nothing short of phenomenal. Issues that once took me days to debug now resolve themselves in just a couple of hours. Here's a prompt template I swear by when debugging (shoutout to Ted Werbel @tedx_ai for this awesome debugging prompt):</p>
+      <p>Despite Claude's occasional task rampages, with careful prompting, its troubleshooting capabilities can be nothing short of phenomenal. Issues that once took me days to debug now resolve themselves in just a couple of hours. Here's a prompt template I swear by when debugging (shoutout to Ted Werbel <a href="https://x.com/tedx_ai" class="twitter-handle">@tedx_ai</a> for this awesome debugging prompt):</p>
       
       <div class="code-container">
         <div class="code-block">
@@ -149,7 +175,7 @@
       
       <p>Above all, treat your projects like your children—know everything about them. The more intimately you understand every component, the easier you'll debug, iterate, and grow your projects. Right now, I'm knee-deep in a database barrier for a future product, studying advanced structures and learning graph databases (send help!). Don't be afraid to lean on AI as a study partner when tackling fundamentals or tricky subjects. LLMs aren't just for generating code; providing context about your project while studying can significantly clarify concepts and accelerate your understanding.</p>
       
-      <p>Old me would've plowed through blindly, relying heavily on AI to patch things up as I went along. But now, a slightly wiser Jack knows that slowing down and mastering fundamentals, especially at critical structural points, pays off enormously. Sure, it may feel slower in the beginning, but future me will be endlessly grateful for the solid foundation. Because remember: If nothing magically works, nothing magically goes wrong.</p>
+      <p>Old me would've plowed through blindly, relying heavily on AI to patch things up as I went along. But now, a slightly wiser Jack knows that slowing down and mastering fundamentals, especially at critical structural points, pays off enormously. Sure, it may feel slower in the beginning, but future me will be endlessly grateful for the solid foundation. Because remember: If nothing magically works, nothing magically breaks.</p>
     </article>
   </main>
   <footer>
