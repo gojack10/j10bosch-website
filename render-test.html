@@ -403,35 +403,11 @@ pub fn start_render_loop() -> Result<(), JsValue> {
 
         async function run() {
             try {
-                // Intercept fetch calls that might be used by the WebAssembly module
-                const originalFetch = window.fetch;
-                window.fetch = async function(url, options) {
-                    console.log(`Intercepted fetch: ${url}`);
-                    
-                    // Check if this is a texture fetch
-                    if (url && typeof url === 'string' && url.includes('block.png')) {
-                        console.log(`Intercepted texture fetch: ${url}`);
-                        
-                        // Create a custom response with the texture data
-                        const response = await fetch('./demos/gpu-acceleration/assets/textures/block.png');
-                        if (response.ok) {
-                            console.log(`Successfully intercepted texture request for ${url}`);
-                        }
-                        return response;
-                    }
-                    
-                    // Pass all other fetches to the original fetch
-                    return originalFetch.apply(this, arguments);
-                };
+                // First, preload the texture directly without interception
+                const texturePath = './demos/gpu-acceleration/assets/textures/block.png';
+                console.log(`Preloading texture from ${texturePath}`);
                 
-                // Initialize the WASM module with the explicit path
-                await init(wasmPath);
-                
-                document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
-                
-                // Preload and make texture available
                 try {
-                    const texturePath = './demos/gpu-acceleration/assets/textures/block.png';
                     const textureResponse = await fetch(texturePath);
                     if (!textureResponse.ok) {
                         throw new Error(`Failed to load texture: ${textureResponse.status} ${textureResponse.statusText}`);
@@ -448,19 +424,51 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                         textureImg.src = textureUrl;
                     });
                     
-                    console.log(`Successfully loaded texture: ${textureImg.width}x${textureImg.height}`);
+                    console.log(`Successfully preloaded texture: ${textureImg.width}x${textureImg.height}`);
                     
-                    // Make the texture available to WebAssembly in multiple ways
+                    // Store the preloaded assets for use in the interception
                     window.TEXTURE_IMAGE = textureImg;
-                    window.TEXTURE_PATH = texturePath;
                     window.TEXTURE_URL = textureUrl;
                     window.TEXTURE_BLOB = textureBlob;
+                    window.TEXTURE_PATH = texturePath;
+                    
+                    // Now set up texture fetch interception - AFTER we've loaded the texture
+                    const originalFetch = window.fetch;
+                    window.fetch = async function(url, options) {
+                        // Only log if it's not a system call
+                        if (typeof url === 'string' && !url.includes('chrome-extension://')) {
+                            console.log(`Intercepted fetch: ${url}`);
+                        }
+                        
+                        // Check if this is a texture fetch
+                        if (url && typeof url === 'string' && url.includes('block.png')) {
+                            console.log(`Intercepted texture fetch: ${url}`);
+                            
+                            // Instead of making another fetch, use the blob we already have
+                            return new Response(window.TEXTURE_BLOB.slice(), {
+                                status: 200,
+                                statusText: 'OK',
+                                headers: {
+                                    'Content-Type': 'image/png'
+                                }
+                            });
+                        }
+                        
+                        // Pass all other fetches to the original fetch
+                        return originalFetch.apply(this, arguments);
+                    };
                     
                     // Also create a global function the WASM might call
-                    window.loadTexture = async function(path) {
+                    window.loadTexture = function(path) {
                         console.log(`loadTexture called with path: ${path}`);
-                        return textureImg;
+                        return window.TEXTURE_IMAGE;
                     };
+                    
+                    // Initialize the WASM module with the explicit path
+                    document.getElementById('status').textContent = 'Status: Loading WebAssembly module...';
+                    await init(wasmPath);
+                    
+                    document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
                     
                     // Get the canvas element
                     const canvas = document.getElementById('canvas');
@@ -469,7 +477,7 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     canvas.width = canvas.clientWidth;
                     canvas.height = canvas.clientHeight;
                     
-                    document.getElementById('status').textContent = 'Status: Texture loaded. Initializing WebGL...';
+                    document.getElementById('status').textContent = 'Status: Initializing WebGL...';
                     
                     // Initialize the application with enhanced error handling
                     let result;
