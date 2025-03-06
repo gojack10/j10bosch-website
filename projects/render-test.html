@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPU Acceleration Test - WebAssembly Demo</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../styles.css">
     <!-- Favicon configuration -->
-    <link rel="icon" type="image/png" href="media/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" href="../media/favicon/favicon-32x32.png">
     <!-- JetBrains Mono font -->
     <style>
         @font-face {
             font-family: 'JetBrains Mono';
-            src: url('media/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+            src: url('../media/fonts/JetBrainsMono-Regular.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -20,9 +20,9 @@
 <body>
     <header>
         <nav class="navbar">
-            <a href="index.html" class="logo">Jack ten Bosch</a>
+            <a href="../index.html" class="logo">Jack ten Bosch</a>
             <div class="nav-links">
-                <a href="blogs.html">blog</a> - <a href="projects.html">projects</a> - <a href="photography.html">photography</a>
+                <a href="../blogs.html">blog</a> - <a href="../projects.html">projects</a> - <a href="../photography.html">photography</a>
             </div>
         </nav>
         <hr class="nav-divider">
@@ -397,13 +397,13 @@ pub fn start_render_loop() -> Result<(), JsValue> {
     <!-- WebAssembly Module Initialization -->
     <script type="module">
         // Set the path to the WebAssembly module
-        const wasmPath = './demos/gpu-acceleration/pkg/gpu_acceleration_test_bg.wasm';
+        const wasmPath = '../demos/gpu-acceleration/pkg/gpu_acceleration_test_bg.wasm';
         
         // Import the JavaScript module
-        import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
+        import init, { initialize, start_render_loop } from '../demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
         
         // Define the exact texture path the user wants to use
-        const TEXTURE_PATH = 'demos/gpu-acceleration/assets/textures/block.png';
+        const TEXTURE_PATH = '../demos/gpu-acceleration/assets/textures/block.png';
         
         /**
          * Direct texture path approach:
@@ -630,6 +630,6 @@ pub fn start_render_loop() -> Result<(), JsValue> {
     </div>
 
     <!-- Include the code-blocks.js script -->
-    <script src="code-blocks.js"></script>
+    <script src="../code-blocks.js"></script>
 </body>
 </html> 
