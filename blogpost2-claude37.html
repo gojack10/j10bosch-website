@@ -182,34 +182,7 @@
     <p>&copy; 2025 Jack ten Bosch. All rights reserved.</p>
   </footer>
 
-  <script>
-    function copyCode(element) {
-      const codeBlock = element.querySelector('.code-line') || element;
-      const textToCopy = codeBlock.textContent;
-      const button = element.querySelector('.copy-button') || element;
-      
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        // Change button text to "Done!"
-        const originalText = button.textContent;
-        button.textContent = 'Done!';
-        
-        // Show notification
-        const notification = document.getElementById('clipboard-notification');
-        notification.classList.add('show');
-        
-        // Hide notification after 2 seconds
-        setTimeout(() => {
-          notification.classList.remove('show');
-        }, 2000);
-        
-        // Reset button text after 2 seconds
-        setTimeout(() => {
-          button.textContent = originalText;
-        }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
-    }
-  </script>
+  <!-- Include the code-blocks.js script -->
+  <script src="code-blocks.js"></script>
 </body>
 </html> 

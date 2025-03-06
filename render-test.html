@@ -448,5 +448,14 @@ pub fn start_render_loop() -> Result<(), JsValue> {
 
         run();
     </script>
+    
+    <!-- Clipboard notification element -->
+    <div class="clipboard-notification" id="clipboard-notification">
+        <span class="clipboard-notification-icon"></span>
+        <span>Copied to your clipboard</span>
+    </div>
+
+    <!-- Include the code-blocks.js script -->
+    <script src="code-blocks.js"></script>
 </body>
 </html> 
