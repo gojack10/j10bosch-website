@@ -403,48 +403,121 @@ pub fn start_render_loop() -> Result<(), JsValue> {
 
         async function run() {
             try {
-                // Preload the texture
-                const texturePath = './demos/gpu-acceleration/assets/textures/block.png';
-                const textureImg = new Image();
-                
-                // Create a promise to load the texture
-                const texturePromise = new Promise((resolve, reject) => {
-                    textureImg.onload = () => resolve(textureImg);
-                    textureImg.onerror = () => reject(new Error(`Failed to load texture from ${texturePath}`));
-                    textureImg.src = texturePath;
-                });
-                
                 // Initialize the WASM module with the explicit path
                 await init(wasmPath);
                 
                 document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
                 
+                // Get the canvas element
+                const canvas = document.getElementById('canvas');
+                
+                // Set the canvas size to match display size
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                
+                // Set texture paths - try multiple options
+                const texturePaths = [
+                    './demos/gpu-acceleration/assets/textures/block.png',
+                    '/demos/gpu-acceleration/assets/textures/block.png',  // Try absolute path
+                    'demos/gpu-acceleration/assets/textures/block.png'    // Try without leading ./
+                ];
+                
+                // Create a fallback texture (1x1 pixel) in case loading fails
+                const fallbackTexture = document.createElement('canvas');
+                fallbackTexture.width = 1;
+                fallbackTexture.height = 1;
+                const fallbackCtx = fallbackTexture.getContext('2d');
+                fallbackCtx.fillStyle = 'magenta'; // Use a bright color to make it obvious
+                fallbackCtx.fillRect(0, 0, 1, 1);
+                
+                // Debug text
+                let debugText = 'Texture debugging info:\n';
+                
+                // Try loading the texture from different paths
+                let textureLoaded = false;
+                let texture = null;
+                
+                for (const path of texturePaths) {
+                    try {
+                        debugText += `Trying to load texture from: ${path}\n`;
+                        
+                        const img = new Image();
+                        
+                        // Create a promise for the texture loading
+                        const texturePromise = new Promise((resolve, reject) => {
+                            img.onload = () => {
+                                debugText += `- Successfully loaded image (${img.width}x${img.height}) from ${path}\n`;
+                                resolve(img);
+                            };
+                            
+                            img.onerror = (e) => {
+                                debugText += `- Failed to load image from ${path}: ${e ? e.message || 'No error details' : 'No error object'}\n`;
+                                reject(new Error(`Failed to load image from ${path}`));
+                            };
+                        });
+                        
+                        // Set crossOrigin to anonymous to avoid CORS issues
+                        img.crossOrigin = 'anonymous';
+                        img.src = path;
+                        
+                        // Wait for the texture to load with a timeout
+                        const timeoutPromise = new Promise((_, reject) => {
+                            setTimeout(() => reject(new Error('Texture loading timed out')), 5000);
+                        });
+                        
+                        texture = await Promise.race([texturePromise, timeoutPromise]);
+                        textureLoaded = true;
+                        
+                        // Log success
+                        console.log(`Successfully loaded texture from ${path}`);
+                        debugText += `Successfully loaded full texture from ${path}\n`;
+                        break;
+                    } catch (e) {
+                        console.warn(`Failed to load texture from ${path}:`, e);
+                        debugText += `Exception while loading ${path}: ${e.message}\n`;
+                        // Continue trying other paths
+                    }
+                }
+                
+                // If no texture loaded, use the fallback
+                if (!textureLoaded) {
+                    console.warn('Using fallback texture');
+                    debugText += 'All texture loading attempts failed. Using fallback texture.\n';
+                    texture = fallbackTexture;
+                }
+                
+                // Make texture available globally
+                window.TEXTURE_IMAGE = texture;
+                window.TEXTURE_PATHS = texturePaths;
+                window.TEXTURE_DEBUG = debugText;
+                
+                // Create texture canvas for WebAssembly to access
+                const textureCanvas = document.createElement('canvas');
+                textureCanvas.width = texture.width || 1;
+                textureCanvas.height = texture.height || 1;
+                const textureCtx = textureCanvas.getContext('2d');
+                
+                // Draw the texture onto the canvas
                 try {
-                    // Wait for texture to load
-                    const texture = await texturePromise;
-                    document.getElementById('status').textContent = 'Status: Texture loaded successfully. Initializing WebGL...';
-                    
-                    // Make texture available globally
-                    window.TEXTURE_IMAGE = texture;
-                    window.TEXTURE_PATH = texturePath;
-                    
-                    // Create texture canvas for WebAssembly to access
-                    const textureCanvas = document.createElement('canvas');
-                    textureCanvas.width = texture.width;
-                    textureCanvas.height = texture.height;
-                    const textureCtx = textureCanvas.getContext('2d');
                     textureCtx.drawImage(texture, 0, 0);
                     window.TEXTURE_CANVAS = textureCanvas;
+                    debugText += 'Successfully created texture canvas.\n';
+                } catch (e) {
+                    console.error('Error drawing texture to canvas:', e);
+                    debugText += `Error drawing texture to canvas: ${e.message}\n`;
                     
-                    // Get the canvas element
-                    const canvas = document.getElementById('canvas');
-                    
-                    // Set the canvas size to match display size
-                    canvas.width = canvas.clientWidth;
-                    canvas.height = canvas.clientHeight;
-                    
-                    // Initialize the application
-                    const result = await initialize(canvas);
+                    // Create a simple colored fallback
+                    textureCtx.fillStyle = 'cyan';
+                    textureCtx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
+                    window.TEXTURE_CANVAS = textureCanvas;
+                }
+                
+                document.getElementById('status').textContent = 'Status: Texture preparation complete. Initializing WebGL...';
+                
+                // Initialize the application
+                let result;
+                try {
+                    result = await initialize(canvas);
                     if (result) {
                         document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
                         
@@ -459,9 +532,11 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     } else {
                         document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGPU.';
                     }
-                } catch (textureError) {
-                    document.getElementById('status').textContent = `Status: Error loading texture: ${textureError.message}`;
-                    console.error('Error loading texture:', textureError);
+                } catch (e) {
+                    // Show detailed error and debugging info
+                    document.getElementById('status').textContent = `Status: Error initializing: ${e.message || e}\n\n${debugText}`;
+                    console.error('Error initializing:', e);
+                    console.log('Debug info:', debugText);
                 }
             } catch (e) {
                 document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;
