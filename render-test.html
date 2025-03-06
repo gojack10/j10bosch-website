@@ -395,6 +395,12 @@ pub fn start_render_loop() -> Result<(), JsValue> {
     </script>
     <!-- WebAssembly Module Initialization -->
     <script type="module">
+        // Set the path to the WebAssembly module
+        const wasmPath = './demos/gpu-acceleration/pkg/gpu_acceleration_test_bg.wasm';
+        
+        // Import the JavaScript module
+        import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
+        
         // Define the exact texture path the user wants to use
         const TEXTURE_PATH = 'demos/gpu-acceleration/assets/textures/block.png';
         
@@ -555,9 +561,6 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 
                 // 3. Initialize the WASM module with all our preparations
                 try {
-                    // Set the path to the WebAssembly module
-                    const wasmPath = './demos/gpu-acceleration/pkg/gpu_acceleration_test_bg.wasm';
-                    
                     document.getElementById('status').textContent = 'Status: Loading WebAssembly module...';
                     
                     // Initialize the WebAssembly module
