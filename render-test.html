@@ -22,7 +22,7 @@
         <nav class="navbar">
             <a href="index.html" class="logo">Jack ten Bosch</a>
             <div class="nav-links">
-                <a href="blogs.html">blog</a> <a href="projects.html">projects</a> <a href="photography.html">photography</a>
+                <a href="/blog">blog</a> - <a href="/projects">projects</a> - <a href="/photography">photography</a>
             </div>
         </nav>
         <hr class="nav-divider">
@@ -31,7 +31,7 @@
     <main>
         <h1>GPU Acceleration Test - WebAssembly Demo</h1>
 
-        <p><a href="https://github.com/gojack10/gpu-acceleration-test">View on GitHub</a></p>
+        <h1><a href="https://github.com/gojack10/gpu-acceleration-test">View on GitHub</a></h1>
 
         <p>This project demonstrates GPU acceleration using modern graphics APIs, implemented in Rust. It features two branches: the <strong>main branch</strong> for native desktop applications and the <strong>web-integration branch</strong> for browser-based WebAssembly deployment.</p>
         
@@ -49,7 +49,7 @@
 
         <p>The main branch is a native desktop application that leverages hardware-accelerated graphics through the wgpu library, providing maximum performance by directly accessing the system's GPU capabilities.</p>
 
-        <pre><code class="language-rust">// From temp_gpu_project/main-branch/src/lib.rs
+        <pre><code class="language-rust">// main/src/lib.rs
 pub mod texture;
 pub mod vertex;
 pub mod render_device;
@@ -361,18 +361,14 @@ pub fn start_render_loop() -> Result<(), JsValue> {
 // Desktop-specific code</code></pre>
 
         <h2>Conclusion</h2>
-
-        <p>This project demonstrates how modern Rust can be used to create high-performance graphics applications that run both natively and on the web. By leveraging WebAssembly, the same core rendering logic works across platforms with minimal adaptation.</p>
+        <p>This project showcases Rust's power in creating cross-platform, high-performance graphics applications using WebAssembly.</p>
         
-        <p>Key takeaways:</p>
+        <p>Key highlights:</p>
         <ul>
-            <li>Rust provides excellent tools for cross-platform graphics development</li>
-            <li>WebAssembly enables high-performance web applications with near-native speed</li>
-            <li>Conditional compilation allows targeting multiple platforms from a single codebase</li>
-            <li>Modern graphics APIs like wgpu provide abstraction over platform-specific details</li>
+            <li>Cross-platform graphics development with Rust</li>
+            <li>High-performance web applications via WebAssembly</li>
+            <li>Compatible for desktop and web platforms</li>
         </ul>
-        
-        <p>Whether you're building desktop applications or web experiences, this architecture offers a solid foundation for GPU-accelerated graphics in Rust.</p>
     </main>
     <button id="scroll-top" aria-label="Scroll to top">^</button>
     <script>
