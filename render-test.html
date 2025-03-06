@@ -401,6 +401,9 @@ pub fn start_render_loop() -> Result<(), JsValue> {
         // Import the JavaScript module
         import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
 
+        // Embedded fallback texture (a simple colored grid pattern)
+        const EMBEDDED_TEXTURE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QEBDCkno+e+kAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAnElEQVQ4y2P8//8/AyWAiYFCQLEBLMic9PT0/0xMTEzR0dH/09PTwWxvb28GJiYmBgYGBhj/PwMDw38MDAwM8fHx/xn+fF5icO7oLX5vRbEVE5jPyMj4n5GR8T8yMjJYPD09nYGRkZEBFL0wxv///xnCw8P/MwIV/P//n+HPnz//GRgYGNjY2P5zcXH9Z2Bg+A8SRwasrKz/SQpESg0AAF6jQNLCuS/fAAAAAElFTkSuQmCC';
+
         // Override the module's imports before initialization
         // This is a way to patch the WASM module to handle texture loading
         async function patchWasmImports() {
@@ -419,7 +422,7 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     if (typeof originalLoadTexture === 'function') {
                         importObject.env.load_texture = function(...args) {
                             console.log('Intercepted load_texture call with args:', args);
-                            // Redirect to our preloaded texture
+                            // Redirect to our embedded texture
                             return window.textureData || null;
                         };
                     }
@@ -427,7 +430,8 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     if (typeof originalGetTexturePath === 'function') {
                         importObject.env.get_texture_path = function(...args) {
                             console.log('Intercepted get_texture_path call with args:', args);
-                            return './demos/gpu-acceleration/assets/textures/block.png';
+                            // Return our embedded data URI
+                            return EMBEDDED_TEXTURE;
                         };
                     }
                     
@@ -453,8 +457,8 @@ pub fn start_render_loop() -> Result<(), JsValue> {
             return canvas.toDataURL('image/png');
         }
         
-        // Preload the texture and convert to a format WebAssembly can use
-        async function preloadTexture() {
+        // Load a texture from a Data URI
+        async function loadTextureFromDataUri(dataUri) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => {
@@ -474,11 +478,11 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                             data: imageData.data,
                             width: img.width,
                             height: img.height,
-                            dataUrl: imageToDataUrl(img)
+                            dataUrl: dataUri
                         };
                         
                         // Set up multiple texture access methods
-                        window.textureSrc = img.src;
+                        window.textureSrc = dataUri;
                         window.textureImage = img;
                         window.textureCanvas = canvas;
                         
@@ -488,37 +492,40 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     }
                 };
                 img.onerror = reject;
-                
-                // Try multiple paths
-                img.src = './demos/gpu-acceleration/assets/textures/block.png';
+                img.src = dataUri;
             });
         }
 
         async function run() {
             try {
-                document.getElementById('status').textContent = 'Status: Preloading texture...';
+                document.getElementById('status').textContent = 'Status: Setting up environment...';
                 
                 // Try to patch WASM imports
                 await patchWasmImports();
                 
-                // Preload the texture first
+                // Load the embedded texture
                 try {
-                    await preloadTexture();
-                    document.getElementById('status').textContent = 'Status: Texture preloaded successfully!';
+                    await loadTextureFromDataUri(EMBEDDED_TEXTURE);
+                    document.getElementById('status').textContent = 'Status: Embedded texture loaded successfully!';
                 } catch (e) {
-                    console.error('Error preloading texture:', e);
-                    document.getElementById('status').textContent = 'Status: Failed to preload texture. Continuing anyway...';
+                    console.error('Error loading embedded texture:', e);
+                    document.getElementById('status').textContent = 'Status: Failed to load embedded texture. Continuing anyway...';
                 }
                 
                 // Initialize the WASM module with the explicit path
-                await init(wasmPath);
-                
-                document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
+                try {
+                    await init(wasmPath);
+                    document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
+                } catch (e) {
+                    console.error('Error initializing WASM module:', e);
+                    document.getElementById('status').textContent = `Status: Error loading WASM module: ${e.message || e}`;
+                    return; // Stop if we can't load the WASM module
+                }
                 
                 // Set up multiple global variables the WebAssembly module might be looking for
                 window.textureLoaded = true;
-                window.texturePath = './demos/gpu-acceleration/assets/textures/block.png';
-                window.assetPath = './demos/gpu-acceleration/assets/';
+                window.texturePath = EMBEDDED_TEXTURE;
+                window.assetPath = '';
                 window.imageCache = {
                     'block.png': window.textureImage
                 };
@@ -527,6 +534,20 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 window.loadImage = (path) => {
                     console.log(`loadImage called with path: ${path}`);
                     return window.textureImage || null;
+                };
+                
+                // Ensure WebAssembly fetch is redirected to our embedded texture
+                const originalFetch = window.fetch;
+                window.fetch = async function(url, options) {
+                    if (url && typeof url === 'string' && url.includes('block.png')) {
+                        console.log(`Intercepted fetch for texture: ${url}`);
+                        const response = new Response(
+                            await fetch(EMBEDDED_TEXTURE).then(r => r.blob()),
+                            { headers: { 'Content-Type': 'image/png' } }
+                        );
+                        return response;
+                    }
+                    return originalFetch.apply(this, arguments);
                 };
                 
                 // Get the canvas element
@@ -540,7 +561,7 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 const originalInitialize = initialize;
                 window.initialize = async function(canvas) {
                     console.log('Custom initialize called');
-                    // Pass our preloaded texture
+                    // Pass our embedded texture data
                     return originalInitialize(canvas, window.textureData);
                 };
                 
@@ -554,7 +575,7 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                         // Start the render loop
                         try {
                             start_render_loop();
-                            document.getElementById('status').textContent = 'Status: Render loop started successfully!';
+                            document.getElementById('status').textContent = 'Status: Render loop started successfully with embedded texture!';
                         } catch (e) {
                             document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
                             console.error('Error starting render loop:', e);
@@ -571,11 +592,6 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     
                     document.getElementById('status').textContent = `Status: Error initializing: ${errorDetails}`;
                     console.error('Error initializing:', e);
-                    
-                    // Add more detailed debugging
-                    document.getElementById('status').textContent += 
-                        '\n\nThis may be due to a CORS issue or how file paths are resolved when not using a local server.' + 
-                        '\n\nTry running with a local server: python3 -m http.server';
                 }
             } catch (e) {
                 document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;
