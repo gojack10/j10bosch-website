@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Acceleration Test - WebAssembly Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Favicon configuration -->
+    <link rel="icon" type="image/png" href="media/favicon/favicon-32x32.png">
+    <!-- JetBrains Mono font -->
+    <style>
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('media/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">Jack ten Bosch</a>
+            <div class="nav-links">
+                <a href="blogs.html">blog</a> <a href="projects.html">projects</a> <a href="photography.html">photography</a>
+            </div>
+        </nav>
+        <hr class="nav-divider">
+    </header>
+
+    <main>
+        <h1>GPU Acceleration Test - WebAssembly Demo</h1>
+
+        <p><a href="https://github.com/gojack10/gpu-acceleration-test">View on GitHub</a></p>
+
+        <p>This project demonstrates GPU acceleration using modern graphics APIs, implemented in Rust. It features two branches: the <strong>main branch</strong> for native desktop applications and the <strong>web-integration branch</strong> for browser-based WebAssembly deployment.</p>
+        
+        <div id="canvas-container" style="width: 100%; height: 500px; position: relative; margin: 20px 0;">
+            <canvas id="canvas" style="width: 100%; height: 100%; border: 1px solid #555; display: block;"></canvas>
+        </div>
+        
+        <div id="status" style="margin-top: 20px; padding: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Status: Loading WebAssembly module...</div>
+
+        <h2>GPU Acceleration in Rust: From Desktop to Web with WebAssembly</h2>
+
+        <p>Modern graphics programming has evolved significantly, with GPU acceleration becoming essential for high-performance applications. This project demonstrates GPU acceleration using Rust and how it can be adapted to run in web browsers through WebAssembly.</p>
+
+        <h2>The Main Branch: Native GPU Acceleration</h2>
+
+        <p>The main branch is a native desktop application that leverages hardware-accelerated graphics through the wgpu library, providing maximum performance by directly accessing the system's GPU capabilities.</p>
+
+        <pre><code class="language-rust">// From temp_gpu_project/main-branch/src/lib.rs
+pub mod texture;
+pub mod vertex;
+pub mod render_device;
+pub mod system_info;
+pub mod state;
+pub mod debug;
+pub mod device_selector;</code></pre>
+
+        <p>Key components include the application entry point, rendering pipeline, geometry definitions, shaders, debug overlay, and device selection for CPU/GPU rendering.</p>
+
+        <h2>Project Overview</h2>
+
+        <h3>Web Integration Branch</h3>
+        <p>The web-integration branch extends the core rendering engine to work in web browsers through WebAssembly, allowing GPU-accelerated rendering to run directly in modern browsers without plugins.</p>
+
+        <h4>Technical Stack:</h4>
+        <ul>
+            <li><strong>Graphics API:</strong> WebGPU/WebGL via wgpu</li>
+            <li><strong>WebAssembly:</strong> wasm-bindgen, wasm-pack</li>
+            <li><strong>JavaScript:</strong> web-sys, js-sys</li>
+            <li><strong>Shader:</strong> WGSL (WebGPU Shading Language)</li>
+        </ul>
+
+        <p>The web integration uses conditional compilation to separate platform-specific code:</p>
+        <pre><code>#[cfg(target_arch = "wasm32")]
+// Web-specific code
+
+#[cfg(not(target_arch = "wasm32"))]
+// Desktop-specific code</code></pre>
+
+        <p>Web-specific features include canvas integration, WebGL context management, and browser event handling.</p>
+
+        <h3>Main Branch (Desktop)</h3>
+        <p>The main branch focuses on native desktop performance, using platform-specific graphics APIs for maximum efficiency.</p>
+
+        <h4>Technical Stack:</h4>
+        <ul>
+            <li><strong>Graphics API:</strong> wgpu (abstracting over Vulkan, Metal, DirectX)</li>
+            <li><strong>Window Management:</strong> winit</li>
+            <li><strong>UI Framework:</strong> egui (for debug overlays)</li>
+            <li><strong>System Information:</strong> sysinfo</li>
+        </ul>
+
+        <p>The desktop version includes hardware-specific optimizations, detailed system information, and an interactive debug overlay.</p>
+
+        <h2>How It Works</h2>
+
+        <p>Both versions share the same core rendering pipeline:</p>
+        <ol>
+            <li>Initialize the graphics context (WebGL for web, native API for desktop)</li>
+            <li>Create shader programs using WGSL</li>
+            <li>Set up vertex and index buffers for 3D geometry</li>
+            <li>Create texture resources</li>
+            <li>Implement a render loop with transformation matrices</li>
+            <li>Display performance metrics</li>
+        </ol>
+
+        <p>The web version compiles to WebAssembly and interfaces with WebGL, while the desktop version compiles to native code and interfaces directly with graphics drivers.</p>
+
+        <h3>Shared Components</h3>
+
+        <p>Both branches share several key components:</p>
+
+        <h4>1. Vertex Definitions</h4>
+
+        <pre><code class="language-rust">// From vertex.rs
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct Vertex {
+    pub position: [f32; 3],
+    pub tex_coords: [f32; 2],
+    pub normal: [f32; 3],
+}</code></pre>
+
+        <h4>2. Render Device Abstraction</h4>
+
+        <pre><code class="language-rust">// From render_device.rs
+#[derive(Clone, Debug, PartialEq)]
+pub enum RenderDevice {
+    CPU,
+    GPU(String),
+}</code></pre>
+
+        <h4>3. Transformation Logic</h4>
+
+        <pre><code class="language-rust">// Create matrices for 3D rendering
+let projection = Mat4::perspective_rh(45.0 * (PI / 180.0), aspect, 0.1, 100.0);
+let view = Mat4::look_at_rh(
+    Vec3::new(0.0, 0.0, 3.0), // Camera position
+    Vec3::new(0.0, 0.0, 0.0), // Look at origin
+    Vec3::new(0.0, 1.0, 0.0), // Up vector
+);</code></pre>
+
+        <h2>Browser Compatibility</h2>
+        <p>The web version requires a browser with WebGL 2 support:</p>
+        <ul>
+            <li>Chrome/Edge (version 79+)</li>
+            <li>Firefox (version 71+)</li>
+            <li>Safari (version 15+)</li>
+        </ul>
+        <p>A dedicated GPU is recommended for optimal performance.</p>
+
+        <h2>Deep Dive: Main Branch Architecture</h2>
+        
+        <p>The main branch leverages hardware-accelerated graphics through wgpu, with these key components:</p>
+        
+        <ul>
+            <li><strong>Rendering Pipeline:</strong> Manages GPU resources and shader execution</li>
+            <li><strong>3D Geometry:</strong> Defines vertices with positions, texture coordinates, and normals</li>
+            <li><strong>Transformation:</strong> Uses matrix math for model-view-projection transformations</li>
+            <li><strong>Debug Overlay:</strong> Provides real-time performance metrics</li>
+            <li><strong>Device Selection:</strong> Allows choosing between CPU and GPU rendering</li>
+        </ul>
+
+        <h3>Initialization Process</h3>
+
+        <pre><code class="language-rust">// Main application initialization
+fn main() -> Result<()> {
+    // Create wgpu instance
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::all(),
+        ..Default::default()
+    });
+    
+    // Get system info and select rendering device
+    let mut system_info = get_system_info(&instance);
+    let render_device = prompt_device_selection(&mut system_info);
+    
+    // Create and run the application
+    let event_loop = EventLoop::new().unwrap();
+    event_loop.run_app(&mut App { /* ... */ })?;
+    Ok(())
+}</code></pre>
+
+        <h3>Shader Implementation</h3>
+        
+        <p>The application uses WGSL (WebGPU Shading Language) for its shaders:</p>
+
+        <pre><code class="language-wgsl">// Vertex shader
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) tex_coords: vec2<f32>,
+    @location(2) normal: vec3<f32>,
+};
+
+@vertex
+fn vs_main(model: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    out.tex_coords = model.tex_coords;
+    out.clip_position = uniforms.model_view_proj * vec4<f32>(model.position, 1.0);
+    out.normal = model.normal;
+    return out;
+}
+
+// Fragment shader
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+    return textureSample(t_diffuse, s_diffuse, in.tex_coords);
+}</code></pre>
+
+        <h3>3D Geometry and Animation</h3>
+        
+        <p>The application renders a textured 3D cube with position, texture coordinates, and normal vectors. The cube rotates continuously, with transformation matrices handling the 3D perspective and camera positioning.</p>
+
+        <h3>Debug Overlay</h3>
+        
+        <p>The application includes a comprehensive debug overlay implemented with egui:</p>
+        
+        <ul>
+            <li>Displays real-time FPS and frame time metrics</li>
+            <li>Shows CPU and GPU information</li>
+            <li>Provides details about the rendering pipeline</li>
+            <li>Includes visualization of coordinate axes</li>
+            <li>Can be toggled on/off with the F1 key</li>
+        </ul>
+
+        <h3>Input Handling</h3>
+        
+        <p>User input is processed in the <code>State::input()</code> method:</p>
+        
+        <ul>
+            <li>Keyboard events for toggling debug overlay (F1)</li>
+            <li>Window resize events to update the rendering surface</li>
+            <li>Mouse events for potential camera control (not fully implemented)</li>
+        </ul>
+
+        <h3>Performance Optimization</h3>
+        
+        <p>The application includes several performance optimizations:</p>
+        
+        <ul>
+            <li>Indexed drawing to reduce vertex data</li>
+            <li>Depth buffering for correct 3D rendering</li>
+            <li>Efficient uniform buffer updates</li>
+            <li>Hardware-specific adapter selection</li>
+            <li>Frame time tracking for performance monitoring</li>
+        </ul>
+
+        <h3>Device Selection</h3>
+        
+        <p>The application allows choosing between CPU and GPU rendering:</p>
+        
+        <ul>
+            <li>The <code>RenderDevice</code> enum represents either CPU or GPU rendering</li>
+            <li>The <code>prompt_device_selection()</code> function displays available devices and lets the user choose</li>
+            <li>The selected device affects adapter selection in the initialization process</li>
+            <li>This allows testing performance differences between software and hardware rendering</li>
+        </ul>
+
+        <h3>Technical Challenges</h3>
+        
+        <p>The main branch addresses several technical challenges:</p>
+        
+        <ul>
+            <li><strong>Cross-Platform Rendering</strong>: Using wgpu to abstract over different graphics APIs (Vulkan, Metal, DirectX)</li>
+            <li><strong>Hardware Detection</strong>: Identifying and selecting appropriate rendering devices</li>
+            <li><strong>Performance Monitoring</strong>: Implementing real-time metrics for GPU and CPU usage</li>
+            <li><strong>3D Mathematics</strong>: Handling transformation matrices and 3D geometry</li>
+            <li><strong>Resource Management</strong>: Properly creating and destroying GPU resources</li>
+        </ul>
+
+        <h3>Code Structure</h3>
+        
+        <p>The codebase is organized into modular components:</p>
+        
+        <ul>
+            <li><strong>main.rs</strong>: Application entry point and event loop</li>
+            <li><strong>state.rs</strong>: Core rendering state and pipeline management</li>
+            <li><strong>vertex.rs</strong>: Vertex definitions and geometry creation</li>
+            <li><strong>texture.rs</strong>: Texture loading and management</li>
+            <li><strong>shader.wgsl</strong>: GPU shader code</li>
+            <li><strong>debug.rs</strong>: Debug overlay and performance monitoring</li>
+            <li><strong>system_info.rs</strong>: Hardware detection and information</li>
+            <li><strong>device_selector.rs</strong>: User interface for device selection</li>
+            <li><strong>render_device.rs</strong>: Abstraction for rendering devices</li>
+        </ul>
+
+        <p>This modular approach makes the code maintainable and extensible, allowing for easy addition of new features or optimization of existing ones.</p>
+
+        <h2>Deep Dive: Web Integration Architecture</h2>
+        
+        <p>The web-integration branch adapts the core architecture to run in browsers through WebAssembly:</p>
+
+        <h3>WebAssembly Integration</h3>
+        
+        <pre><code class="language-rust">// Web-specific module
+#[cfg(target_arch = "wasm32")]
+pub mod web;
+
+// Exposed functions for JavaScript
+#[wasm_bindgen]
+pub fn init() {
+    init_logging();
+}
+
+#[wasm_bindgen]
+pub async fn initialize(canvas: HtmlCanvasElement) -> Result<bool, JsValue> {
+    // Initialize WebGL context
+}
+
+#[wasm_bindgen]
+pub fn start_render_loop() -> Result<(), JsValue> {
+    // Start animation frame loop
+}</code></pre>
+
+        <h3>WebGL Rendering Pipeline</h3>
+        
+        <p>The web version adapts the main branch's rendering pipeline to use WebGL 2:</p>
+        
+        <ul>
+            <li>GLSL ES 3.0 shaders converted from the main branch's WGSL</li>
+            <li>WebGL buffer objects for geometry data</li>
+            <li>Uniform variables for transformations</li>
+            <li>Browser's requestAnimationFrame for timing</li>
+        </ul>
+
+        <h3>Key Differences Between Branches</h3>
+
+        <h4>1. Graphics API</h4>
+        <ul>
+            <li><strong>Main Branch:</strong> Uses native backends (Vulkan, Metal, DirectX)</li>
+            <li><strong>Web Branch:</strong> Uses WebGL 2 with browser limitations</li>
+        </ul>
+
+        <h4>2. Rendering Architecture</h4>
+        <ul>
+            <li><strong>Main Branch:</strong> Uses WGSL shaders and native rendering pipeline</li>
+            <li><strong>Web Branch:</strong> Uses GLSL ES 3.0 shaders and WebGL pipeline</li>
+        </ul>
+
+        <h4>3. Platform Integration</h4>
+        <ul>
+            <li><strong>Main Branch:</strong> Interfaces with native window system and event handling</li>
+            <li><strong>Web Branch:</strong> Interfaces with browser DOM and requestAnimationFrame</li>
+        </ul>
+
+        <h4>4. Build System</h4>
+        <ul>
+            <li><strong>Main Branch:</strong> Standard Cargo build for native binaries</li>
+            <li><strong>Web Branch:</strong> wasm-pack for WebAssembly compilation</li>
+        </ul>
+
+        <p>The codebase uses conditional compilation to handle these differences:</p>
+        
+        <pre><code class="language-rust">#[cfg(target_arch = "wasm32")]
+// Web-specific code
+
+#[cfg(not(target_arch = "wasm32"))]
+// Desktop-specific code</code></pre>
+
+        <h2>Conclusion</h2>
+
+        <p>This project demonstrates how modern Rust can be used to create high-performance graphics applications that run both natively and on the web. By leveraging WebAssembly, the same core rendering logic works across platforms with minimal adaptation.</p>
+        
+        <p>Key takeaways:</p>
+        <ul>
+            <li>Rust provides excellent tools for cross-platform graphics development</li>
+            <li>WebAssembly enables high-performance web applications with near-native speed</li>
+            <li>Conditional compilation allows targeting multiple platforms from a single codebase</li>
+            <li>Modern graphics APIs like wgpu provide abstraction over platform-specific details</li>
+        </ul>
+        
+        <p>Whether you're building desktop applications or web experiences, this architecture offers a solid foundation for GPU-accelerated graphics in Rust.</p>
+    </main>
+    <button id="scroll-top" aria-label="Scroll to top">^</button>
+    <script>
+      const scrollButton = document.getElementById('scroll-top');
+      
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+          scrollButton.classList.add('visible');
+        } else {
+          scrollButton.classList.remove('visible');
+        }
+      });
+      
+      scrollButton.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    </script>
+    <!-- WebAssembly Module Initialization -->
+    <script type="module">
+        // Set the path to the WebAssembly module
+        const wasmPath = './demos/gpu-acceleration/pkg/gpu_acceleration_test_bg.wasm';
+        
+        // Import the JavaScript module
+        import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
+
+        async function run() {
+            try {
+                // Initialize the WASM module with the explicit path
+                await init(wasmPath);
+                
+                document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
+                
+                // Get the canvas element
+                const canvas = document.getElementById('canvas');
+                
+                // Set the canvas size to match display size
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                
+                // Initialize the application
+                const result = await initialize(canvas);
+                if (result) {
+                    document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
+                    
+                    // Start the render loop
+                    try {
+                        start_render_loop();
+                        document.getElementById('status').textContent = 'Status: Render loop started successfully!';
+                    } catch (e) {
+                        document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
+                        console.error('Error starting render loop:', e);
+                    }
+                } else {
+                    document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGPU.';
+                }
+            } catch (e) {
+                document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;
+                console.error('Error:', e);
+            }
+        }
+
+        // Handle window resize to update canvas size
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('canvas');
+            if (canvas) {
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+            }
+        });
+
+        run();
+    </script>
+</body>
+</html> 

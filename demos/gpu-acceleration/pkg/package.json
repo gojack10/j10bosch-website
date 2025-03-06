@@ -1,0 +1,15 @@
+{
+  "name": "gpu-acceleration-test",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "gpu_acceleration_test_bg.wasm",
+    "gpu_acceleration_test.js",
+    "gpu_acceleration_test.d.ts"
+  ],
+  "main": "gpu_acceleration_test.js",
+  "types": "gpu_acceleration_test.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
