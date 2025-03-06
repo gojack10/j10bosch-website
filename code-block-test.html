@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Block Scrolling Test</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo">Jack ten Bosch</a>
+      <div class="nav-links">
+         <a href="blogs.html">blog</a> - <a href="projects.html">projects</a> - <a href="syntax-highlighting-demo.html">syntax demo</a>
+      </div>
+    </nav>
+    <hr class="nav-divider">
+  </header>
+  
+  <main>
+    <h1>Code Block Scrolling Test</h1>
+    
+    <p>This page tests the scrolling behavior of code blocks with fixed position elements.</p>
+    
+    <h2>Wide Python Example</h2>
+    <pre><code class="language-python">
+def very_long_function_name_to_test_horizontal_scrolling(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15):
+    """
+    This is a very long function with many parameters to test horizontal scrolling in code blocks.
+    The language indicator and copy button should remain fixed in position when scrolling horizontally.
+    """
+    # This is a very long comment that extends beyond the normal width of the screen to force horizontal scrolling in the code block
+    result = param1 + param2 + param3 + param4 + param5 + param6 + param7 + param8 + param9 + param10 + param11 + param12 + param13 + param14 + param15
+    
+    # Another very long line with a lot of operations to test horizontal scrolling behavior
+    complex_calculation = param1 * 1000 + param2 * 900 + param3 * 800 + param4 * 700 + param5 * 600 + param6 * 500 + param7 * 400 + param8 * 300 + param9 * 200 + param10 * 100 + param11 * 90 + param12 * 80 + param13 * 70 + param14 * 60 + param15 * 50
+    
+    return result, complex_calculation
+</code></pre>
+  </main>
+  
+  <footer>
+    <p>&copy; 2025 Jack ten Bosch. All rights reserved.</p>
+  </footer>
+
+  <!-- Clipboard notification element -->
+  <div class="clipboard-notification" id="clipboard-notification">
+    <span class="clipboard-notification-icon"></span>
+    <span>Copied to your clipboard</span>
+  </div>
+
+  <!-- Include the code-blocks.js script -->
+  <script src="code-blocks.js"></script>
+</body>
+</html> 

@@ -324,14 +324,35 @@ md-block:not(:defined) {
   background-color: #1a1b26;
   color: #c0caf5;
   padding: 20px;
-  padding-top: 30px;
+  padding-top: 10px;
   border-radius: 6px;
-  overflow-x: auto;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   line-height: 1.6;
   display: block;
   position: relative;
+  overflow-x: hidden; /* Prevent horizontal scrolling on the container */
+}
+
+/* Language indicator for code blocks */
+.language-indicator {
+  position: static;
+  font-size: 12px;
+  color: #7aa2f7;
+  font-weight: bold;
+  text-transform: uppercase;
+  opacity: 0.8;
+  border: 1px solid #7aa2f7;
+  border-radius: 4px;
+  padding: 2px 6px;
+  z-index: 10;
+  background-color: #1a1b26;
+  display: inline-block;
+}
+
+.code-block > div:last-child {
+  overflow-x: auto; /* Enable horizontal scrolling on the content wrapper */
+  padding-bottom: 5px;
 }
 
 .code-line {
@@ -344,21 +365,24 @@ md-block:not(:defined) {
 }
 
 .copy-button {
-  position: absolute;
-  top: 5px;
-  right: 10px;
+  position: static;
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  color: #7aa2f7;
+  border: 1px solid #7aa2f7;
   border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
   cursor: pointer;
-  z-index: 1;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: bold;
+  padding: 2px 6px;
+  opacity: 0.8;
+  z-index: 10;
+  background-color: #1a1b26;
 }
 
 .copy-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+  background-color: rgba(122, 162, 247, 0.1);
 }
 
 /* Notification styles */

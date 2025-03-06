@@ -15,9 +15,61 @@ document.addEventListener('DOMContentLoaded', function() {
     notification.className = 'clipboard-notification'; // Reset to just this class, removing any 'show' class
   }
   
-  // Convert all pre > code blocks to our styled code blocks
-  convertCodeBlocks();
+  // Load Highlight.js if it's not already loaded
+  if (typeof hljs === 'undefined') {
+    // Load highlight.js script
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+    script.onload = function() {
+      // Load language files (Python, R, and Rust)
+      const languagesToLoad = ['python', 'r', 'rust'];
+      let loadedLanguages = 0;
+      
+      languagesToLoad.forEach(lang => {
+        const langScript = document.createElement('script');
+        langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/${lang}.min.js`;
+        langScript.onload = function() {
+          loadedLanguages++;
+          if (loadedLanguages === languagesToLoad.length) {
+            // All languages loaded, now highlight and convert code blocks
+            highlightAndConvertCodeBlocks();
+          }
+        };
+        document.head.appendChild(langScript);
+      });
+      
+      // Load default stylesheet
+      const stylesheet = document.createElement('link');
+      stylesheet.rel = 'stylesheet';
+      stylesheet.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css';
+      document.head.appendChild(stylesheet);
+    };
+    document.head.appendChild(script);
+  } else {
+    // highlight.js is already loaded, just convert code blocks
+    highlightAndConvertCodeBlocks();
+  }
 });
+
+// Function to highlight code with highlight.js and then convert to our styled blocks
+function highlightAndConvertCodeBlocks() {
+  // First apply highlighting to standard code blocks
+  document.querySelectorAll('pre > code').forEach(block => {
+    // Check for language class
+    const classMatch = block.className.match(/language-(\w+)/);
+    if (classMatch) {
+      // Apply highlighting only for supported languages
+      const language = classMatch[1];
+      if (['python', 'r', 'rust'].includes(language.toLowerCase())) {
+        hljs.highlightElement(block);
+      }
+      // For plaintext/text, we don't need to apply highlighting
+    }
+  });
+  
+  // Then convert to our styled blocks
+  convertCodeBlocks();
+}
 
 // Function to convert regular code blocks to styled code blocks
 function convertCodeBlocks() {
@@ -27,10 +79,20 @@ function convertCodeBlocks() {
     const pre = codeBlock.parentNode;
     let content = codeBlock.innerHTML;
     
-    // Preserve original content without HTML entity conversions
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    content = tempDiv.textContent || tempDiv.innerText;
+    // Get language if specified
+    let language = '';
+    const classMatch = codeBlock.className.match(/language-(\w+)/);
+    if (classMatch) {
+      language = classMatch[1].toLowerCase();
+    } else if (codeBlock.classList.contains('hljs')) {
+      // If hljs already applied highlighting, try to detect language from class
+      for (const cls of codeBlock.classList) {
+        if (['python', 'r', 'rust'].includes(cls.toLowerCase())) {
+          language = cls.toLowerCase();
+          break;
+        }
+      }
+    }
     
     // Create the new structure
     const container = document.createElement('div');
@@ -38,6 +100,45 @@ function convertCodeBlocks() {
     
     const styledBlock = document.createElement('div');
     styledBlock.className = 'code-block';
+    
+    // Create a header div for the language indicator and copy button
+    const codeHeader = document.createElement('div');
+    codeHeader.style.display = 'flex';
+    codeHeader.style.justifyContent = 'space-between';
+    codeHeader.style.alignItems = 'center';
+    codeHeader.style.position = 'sticky';
+    codeHeader.style.left = '0';
+    codeHeader.style.right = '0';
+    codeHeader.style.width = '100%';
+    codeHeader.style.marginBottom = '15px';
+    codeHeader.style.zIndex = '10';
+    codeHeader.style.backgroundColor = '#1a1b26';
+    
+    // Add language indicator if available
+    if (language) {
+      const langIndicator = document.createElement('div');
+      langIndicator.className = 'language-indicator';
+      langIndicator.textContent = language;
+      codeHeader.appendChild(langIndicator);
+    } else {
+      // Add an empty spacer div if no language indicator
+      const spacer = document.createElement('div');
+      codeHeader.appendChild(spacer);
+    }
+    
+    // Add copy button
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-button';
+    copyButton.textContent = 'Copy';
+    copyButton.onclick = function() { copyCode(this.closest('.code-block')); };
+    codeHeader.appendChild(copyButton);
+    
+    // Add the header to the styled block
+    styledBlock.appendChild(codeHeader);
+    
+    // Create a content wrapper for the code
+    const contentWrapper = document.createElement('div');
+    contentWrapper.style.overflow = 'auto';
     
     // Process content line by line
     const lines = content.split('\n');
@@ -57,25 +158,19 @@ function convertCodeBlocks() {
         codeLine.className += ' indented';
       }
       
-      // Preserve whitespace
-      const codeContent = document.createElement('code');
-      codeContent.textContent = line;
-      codeLine.appendChild(codeContent);
+      // Keep the HTML structure generated by highlight.js
+      codeLine.innerHTML = line;
       
-      styledBlock.appendChild(codeLine);
+      contentWrapper.appendChild(codeLine);
       
       // Add line break except for the last line
       if (i < lines.length - 1) {
-        styledBlock.appendChild(document.createElement('br'));
+        contentWrapper.appendChild(document.createElement('br'));
       }
     }
     
-    // Add copy button
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-button';
-    copyButton.textContent = 'Copy';
-    copyButton.onclick = function() { copyCode(this.parentElement); };
-    styledBlock.appendChild(copyButton);
+    // Add the content wrapper to the styled block
+    styledBlock.appendChild(contentWrapper);
     
     // Replace the original pre with our new structure
     container.appendChild(styledBlock);
@@ -86,7 +181,7 @@ function convertCodeBlocks() {
 function copyCode(element) {
   // Extract the text content from all code spans
   let textToCopy = '';
-  const codeLines = element.querySelectorAll('.code-line code');
+  const codeLines = element.querySelectorAll('.code-line');
   
   codeLines.forEach((line, index) => {
     if (index > 0) {
@@ -118,4 +213,4 @@ function copyCode(element) {
   }).catch(err => {
     console.error('Failed to copy text: ', err);
   });
-} 
+}

@@ -22,7 +22,7 @@
         <nav class="navbar">
             <a href="index.html" class="logo">Jack ten Bosch</a>
             <div class="nav-links">
-                <a href="/blog">blog</a> - <a href="/projects">projects</a> - <a href="/photography">photography</a>
+                <a href="blogs.html">blog</a> - <a href="projects.html">projects</a> - <a href="photography.html">photography</a>
             </div>
         </nav>
         <hr class="nav-divider">
@@ -74,7 +74,7 @@ pub mod device_selector;</code></pre>
         </ul>
 
         <p>The web integration uses conditional compilation to separate platform-specific code:</p>
-        <pre><code>#[cfg(target_arch = "wasm32")]
+        <pre><code class="language-rust">#[cfg(target_arch = "wasm32")]
 // Web-specific code
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -188,7 +188,7 @@ fn main() -> Result<()> {
         
         <p>The application uses WGSL (WebGPU Shading Language) for its shaders:</p>
 
-        <pre><code class="language-wgsl">// Vertex shader
+        <pre><code class="language-rust">// Vertex shader
 struct VertexInput {
     @location(0) position: vec3<f32>,
     @location(1) tex_coords: vec2<f32>,
@@ -370,6 +370,11 @@ pub fn start_render_loop() -> Result<(), JsValue> {
             <li>Compatible for desktop and web platforms</li>
         </ul>
     </main>
+
+    <footer>
+        <p>&copy; 2025 Jack ten Bosch. All rights reserved.</p>
+    </footer>
+
     <button id="scroll-top" aria-label="Scroll to top">^</button>
     <script>
       const scrollButton = document.getElementById('scroll-top');
