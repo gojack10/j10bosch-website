@@ -403,36 +403,65 @@ pub fn start_render_loop() -> Result<(), JsValue> {
 
         async function run() {
             try {
+                // Preload the texture
+                const texturePath = './demos/gpu-acceleration/assets/textures/block.png';
+                const textureImg = new Image();
+                
+                // Create a promise to load the texture
+                const texturePromise = new Promise((resolve, reject) => {
+                    textureImg.onload = () => resolve(textureImg);
+                    textureImg.onerror = () => reject(new Error(`Failed to load texture from ${texturePath}`));
+                    textureImg.src = texturePath;
+                });
+                
                 // Initialize the WASM module with the explicit path
                 await init(wasmPath);
                 
                 document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
                 
-                // Get the canvas element
-                const canvas = document.getElementById('canvas');
-                
-                // Set the canvas size to match display size
-                canvas.width = canvas.clientWidth;
-                canvas.height = canvas.clientHeight;
-                
-                // Add texture path to window object so Rust can access it
-                window.TEXTURE_PATH = './demos/gpu-acceleration/assets/textures/block.png';
-                
-                // Initialize the application
-                const result = await initialize(canvas);
-                if (result) {
-                    document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
+                try {
+                    // Wait for texture to load
+                    const texture = await texturePromise;
+                    document.getElementById('status').textContent = 'Status: Texture loaded successfully. Initializing WebGL...';
                     
-                    // Start the render loop
-                    try {
-                        start_render_loop();
-                        document.getElementById('status').textContent = 'Status: Render loop started successfully!';
-                    } catch (e) {
-                        document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
-                        console.error('Error starting render loop:', e);
+                    // Make texture available globally
+                    window.TEXTURE_IMAGE = texture;
+                    window.TEXTURE_PATH = texturePath;
+                    
+                    // Create texture canvas for WebAssembly to access
+                    const textureCanvas = document.createElement('canvas');
+                    textureCanvas.width = texture.width;
+                    textureCanvas.height = texture.height;
+                    const textureCtx = textureCanvas.getContext('2d');
+                    textureCtx.drawImage(texture, 0, 0);
+                    window.TEXTURE_CANVAS = textureCanvas;
+                    
+                    // Get the canvas element
+                    const canvas = document.getElementById('canvas');
+                    
+                    // Set the canvas size to match display size
+                    canvas.width = canvas.clientWidth;
+                    canvas.height = canvas.clientHeight;
+                    
+                    // Initialize the application
+                    const result = await initialize(canvas);
+                    if (result) {
+                        document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
+                        
+                        // Start the render loop
+                        try {
+                            start_render_loop();
+                            document.getElementById('status').textContent = 'Status: Render loop started successfully!';
+                        } catch (e) {
+                            document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
+                            console.error('Error starting render loop:', e);
+                        }
+                    } else {
+                        document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGPU.';
                     }
-                } else {
-                    document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGPU.';
+                } catch (textureError) {
+                    document.getElementById('status').textContent = `Status: Error loading texture: ${textureError.message}`;
+                    console.error('Error loading texture:', textureError);
                 }
             } catch (e) {
                 document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;

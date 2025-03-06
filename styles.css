@@ -377,10 +377,14 @@ md-block:not(:defined) {
   display: flex;
   align-items: center;
   gap: 8px;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .clipboard-notification.show {
   right: 20px;
+  opacity: 1;
+  visibility: visible;
 }
 
 .clipboard-notification-icon {
