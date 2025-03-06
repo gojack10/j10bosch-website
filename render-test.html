@@ -415,6 +415,9 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 canvas.width = canvas.clientWidth;
                 canvas.height = canvas.clientHeight;
                 
+                // Add texture path to window object so Rust can access it
+                window.TEXTURE_PATH = './demos/gpu-acceleration/assets/textures/block.png';
+                
                 // Initialize the application
                 const result = await initialize(canvas);
                 if (result) {

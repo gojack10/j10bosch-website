@@ -3,12 +3,16 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!document.getElementById('clipboard-notification')) {
     const notification = document.createElement('div');
     notification.id = 'clipboard-notification';
-    notification.className = 'clipboard-notification';
+    notification.className = 'clipboard-notification'; // Make sure it starts with just this class
     notification.innerHTML = `
       <span class="clipboard-notification-icon"></span>
       <span>Copied to your clipboard</span>
     `;
     document.body.appendChild(notification);
+  } else {
+    // Ensure existing notification has the correct classes
+    const notification = document.getElementById('clipboard-notification');
+    notification.className = 'clipboard-notification'; // Reset to just this class, removing any 'show' class
   }
   
   // Convert all pre > code blocks to our styled code blocks
@@ -21,7 +25,12 @@ function convertCodeBlocks() {
   
   codeBlocks.forEach(codeBlock => {
     const pre = codeBlock.parentNode;
-    const content = codeBlock.innerHTML;
+    let content = codeBlock.innerHTML;
+    
+    // Preserve original content without HTML entity conversions
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    content = tempDiv.textContent || tempDiv.innerText;
     
     // Create the new structure
     const container = document.createElement('div');
@@ -32,23 +41,34 @@ function convertCodeBlocks() {
     
     // Process content line by line
     const lines = content.split('\n');
-    lines.forEach(line => {
-      if (line.trim() !== '') {
-        const codeLine = document.createElement('span');
-        codeLine.className = 'code-line';
-        
-        // Check if line starts with spaces or tabs for indentation
-        if (line.match(/^(\s+)/)) {
-          codeLine.className += ' indented';
-        }
-        
-        codeLine.innerHTML = line;
-        styledBlock.appendChild(codeLine);
-      } else {
-        // Add empty lines
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      if (i === lines.length - 1 && line.trim() === '') {
+        // Skip empty last line
+        continue;
+      }
+      
+      const codeLine = document.createElement('span');
+      codeLine.className = 'code-line';
+      
+      // Check if line starts with spaces or tabs for indentation
+      if (line.match(/^(\s+)/)) {
+        codeLine.className += ' indented';
+      }
+      
+      // Preserve whitespace
+      const codeContent = document.createElement('code');
+      codeContent.textContent = line;
+      codeLine.appendChild(codeContent);
+      
+      styledBlock.appendChild(codeLine);
+      
+      // Add line break except for the last line
+      if (i < lines.length - 1) {
         styledBlock.appendChild(document.createElement('br'));
       }
-    });
+    }
     
     // Add copy button
     const copyButton = document.createElement('button');
@@ -64,8 +84,17 @@ function convertCodeBlocks() {
 }
 
 function copyCode(element) {
-  const codeBlock = element;
-  const textToCopy = codeBlock.textContent.replace('Copy', '').replace('Done!', '').trim();
+  // Extract the text content from all code spans
+  let textToCopy = '';
+  const codeLines = element.querySelectorAll('.code-line code');
+  
+  codeLines.forEach((line, index) => {
+    if (index > 0) {
+      textToCopy += '\n';
+    }
+    textToCopy += line.textContent;
+  });
+  
   const button = element.querySelector('.copy-button');
   
   navigator.clipboard.writeText(textToCopy).then(() => {
