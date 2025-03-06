@@ -401,188 +401,353 @@ pub fn start_render_loop() -> Result<(), JsValue> {
         // Import the JavaScript module
         import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
 
-        /**
-         * This is a completely different approach to solving the texture loading issue:
-         * 
-         * 1. Create an embedded texture as a base64 string
-         * 2. Convert it to a Blob
-         * 3. Create an Object URL from the Blob
-         * 4. Intercept all network requests and redirect texture requests to the Object URL
-         * 
-         * This approach works even without a local server because it uses the browser's
-         * internal object URL system instead of trying to load from the file system.
-         */
-
+        // Known texture names to pre-load
+        const TEXTURE_NAMES = ["block.png", "cube-diffuse.jpg", "texture.png"];
+        
         // Embedded fallback texture (simple colored checkerboard pattern)
         const BASE64_TEXTURE = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5gMYEDsfj4N/OQAABm1JREFUWMOtl21sU9cZx3/n3Gvn2o6dN+clJCYJIUAWlhdaKAF1UNEK1A+VukrVNE3dF7ZJ+zB13aa1X5C6D5u0SWxT2w9Tx6RKadUOKKulYwxYCZSXhkAIIQl5cRKc2I5j3+u3c/ZhJA2ksVvGI13pvno8z+/8zvM/z3kE/8dSSiHE7+XH86aiAhSGocySF9UQlzABqTXFe5qLKTKKSVEAWiuE+L4Qv/2bYbpqLEvKdEanpqL+ihLZ1Njg31BT7asLBKRwu4QCUFojJVi2ZnxiLt0/MBE/c+HW1etDM/GyUv+fP3jvtR9a1sIMflpCqxUBRO41MTVtTyRmFQDKEIQqSoQBvD0wnl6xptJdWiLd4Xdm7MrKcplKZXVLc5kABJ+8P9TzxZNtVZ+cjVm9V2LZF14/fPVDYAVzQXPCFm0e6U4bhPQ/vqPJt6VQhNaanmtT+r1/j9haK1lWYqj1tYFUe1uFu/F+ZGdvTNuLV2a9f8OWm86enLzjOnkmRkVF4OTrL2/8rGUJO66JWAe7e6fXP/tKV1CIgjwUpg2H350S123bgwJ8XiHLy0xl25rIWJKGVWXi5sispTVaQrLX4+rN0ZSkp6dXHz8xRFVVye/efGXz1ge1YADoODwkXn5tqC4YdO1aSlwAly5PiB9/N1yXmEuxdGgEMBGJi/Xry1bvfbba9+iGSvdcJitv9I3Zho5MxG8G696+eF9sSQCt4fjpCdeHJ+KrCohLoLdvhnRaIcTSUZHAhp8cCra+82FPNJ3OzlpQJCUlhXJNJj2b3usawu9zx371cstUQQAp4eqNZBGfAMdJFF1wBdDz9zs0Nfocy8bljIjDYdjuTDqLEOTt24Iuv/zFugk7kcwCeXPP40QKs6IAi76lbMl8s4GiMg0iVc4HfRIHUJZXLFwD30/MHzdKQAhRlDiA41C0G7XG0UUuahAtQdPQmixmUqwgSKUUm9pCRY9OYUt3tzs0jzZLMQCbWqqKHovSSVlwRBoLOeYJ6MRsdikrGN5Mm3Tt+nBvrnbzW3gw0HvP9Xc/8PlczmLHBbTWGMX2npAuKI4Xq5DfSZ4JXYeviEw6ha2LnQALwQPRXR5gzsIAstkscRGgvGI1Ho9Z1Kgp8+I5JeCUg/AgTBfSMJGGmWtSEwHYtk00MUznyROM3Y04QoIQCGHg9Qd5dNs2nnv+OWrq1xQFkErZ+L05gGQyyfvHP+DQwYOYrSZqw2rwer1orZmensZ2bKqqqmhpaVkGIGcnThw9ymxihl279+D3+xf9x2YT/OLAAdatW8e+ffsIh8ML74QQjzYTSil6e3s5cuQI3/rOt9m2bduCJ5/Px549e2huvp8n3/ve93j3b+/Q3t6O18zZ/sT8rYhEIrz11lsMDg2ybft2Nm/eTGVlJQCHDx/mR/teorpulJGRC3R3R1i9uoYdO3bQ1NTEwMAAXV1dfOPFb9La2rpAlFIKwzCIxWJ89NFHrFtTx/Hjx7kz/TlCCJRStLW1cfjQYerr64lGoxw8+DpnT58inUrjL/Xz5JNPsXPnTurq6h4CmJiYoLOzk1QqxbPPPktjY+OiZxeAYRhkMhnS6TSmaRIMBuno6ODs2bN0dHSQTCYJh8OsWbNmcQ5YlsXIyAg+n4/du3cXJM6XaZpUV1fjOA6xWIzBwUHi8ThKKZqamti6dSulpaWPAKTTaRzHoa6uDq/X+0Bkent7c0nY3LwwT+rq6qirq1uWvMfjoa2tjXQ6TSwWw+fzLQB8aR4YhoFlWQgh8Pv9y5LTWnPu3DkuXbpEfX09L7zwPIcOHeLcuXOsW7eOF198kbKysmVzwTAMKisr0VoTCAQeCXzho10ul9vtdnPmzBn2799PZWUl1dXVnD9/nt///g+sWrWKffv2EQqFCgLMVwEAj8eDz+dbDHrfe7Esy7Ftm/Xr1/Pmm29y9epVpqameHX/fu7evUsmk6G7u5tYLEZNTU1BgAcPzJ2FJQ6GsiyrvLy8nFQqxepQiJaWFpRSXL58GcdxkFIyNjaGaZpEo1Ha2tpIJpNFASilsG0bwzCW3KSWlZVtbG5u/nNXVxcBv5/+/n4ikQjhcJiamhpisRiJRIJoNMqVK1d47bXX2LhxI36/n2QyiWVZOI5TkHyeffmXFHCUUn8UQryjlHJyj6NSqZT6QzKZ/GE8Hv9aMpnkvwGC75A4z4KMqQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMi0wMy0yNFQxNjoxMTozMSswMDowMJ7GGII5RQY5AAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIyLTAzLTI0VDE2OjExOjMxKzAwOjAw8PoJ/QAAAABJRkVpOXIpTA==';
+
+        /**
+         * Advanced texture handling strategy:
+         * 
+         * 1. Create texture objects for known texture names
+         * 2. Modify WebAssembly.instantiate to patch all imports related to textures
+         * 3. Intercept ALL possible network requests at multiple levels
+         * 4. Provide global texture accessor functions
+         */
         
-        // This will hold our object URL for the texture
-        let textureObjectUrl = null;
-        
-        // Create a texture from base64 data
-        function createTextureFromBase64() {
-            // Convert base64 to binary
-            const binaryString = atob(BASE64_TEXTURE);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+        // Create a blob URL from base64 data
+        function createBlobUrl(base64Data) {
+            try {
+                // Convert base64 to binary
+                const binaryString = atob(base64Data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Create a blob and URL
+                const blob = new Blob([bytes], { type: 'image/png' });
+                return URL.createObjectURL(blob);
+            } catch (e) {
+                console.error('Error creating blob URL:', e);
+                return null;
             }
-            
-            // Create a blob from the binary data
-            const blob = new Blob([bytes], { type: 'image/png' });
-            
-            // Create an object URL from the blob
-            textureObjectUrl = URL.createObjectURL(blob);
-            
-            console.log(`Created texture object URL: ${textureObjectUrl}`);
-            return textureObjectUrl;
         }
         
-        // Set up a virtual file system for textures
-        function setupVirtualFileSystem() {
-            // Create our texture object URL
-            const textureUrl = createTextureFromBase64();
+        // Set up texture data and make it globally available
+        async function setupTextures() {
+            // Create all texture sources
+            const blobUrl = createBlobUrl(BASE64_TEXTURE);
+            if (!blobUrl) {
+                throw new Error('Failed to create blob URL');
+            }
             
-            // Create an image element and preload the texture
-            const img = new Image();
-            img.src = textureUrl;
+            // Store texture metadata
+            window.textureCache = {};
+            window.texturePaths = {};
+            window.textureData = null; // Will hold the primary texture data
             
-            // Wait for the image to load
+            // Load the image and extract its data
             return new Promise((resolve, reject) => {
+                const img = new Image();
                 img.onload = () => {
-                    // Store texture information in global variables
-                    window.virtualFileSystem = {
-                        'block.png': {
-                            url: textureUrl,
-                            blob: new Blob([new Uint8Array(atob(BASE64_TEXTURE).split('').map(c => c.charCodeAt(0)))], { type: 'image/png' }),
-                            image: img
-                        }
+                    // Create a canvas to extract pixel data
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Extract the image data
+                    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                    
+                    // Store texture data in multiple formats for different access patterns
+                    window.textureData = {
+                        data: imageData.data,
+                        width: img.width, 
+                        height: img.height,
+                        url: blobUrl,
+                        image: img,
+                        canvas: canvas
                     };
                     
-                    // Override all methods that might be used to load files
-                    overrideFileLoading();
-                    resolve();
+                    // Create cache entries for all known texture names
+                    TEXTURE_NAMES.forEach(name => {
+                        window.textureCache[name] = window.textureData;
+                        window.texturePaths[name] = blobUrl;
+                        
+                        // Also store at common paths the texture might be looked up at
+                        const variations = [
+                            name,
+                            `/${name}`,
+                            `./demos/gpu-acceleration/assets/${name}`,
+                            `./assets/${name}`,
+                            `assets/${name}`,
+                            `demos/gpu-acceleration/assets/${name}`
+                        ];
+                        
+                        variations.forEach(path => {
+                            window.textureCache[path] = window.textureData;
+                            window.texturePaths[path] = blobUrl;
+                        });
+                    });
+                    
+                    console.log('Texture setup complete:', window.textureData);
+                    resolve(window.textureData);
                 };
-                img.onerror = reject;
+                
+                img.onerror = (err) => {
+                    console.error('Error loading texture image:', err);
+                    reject(new Error('Failed to load texture image'));
+                };
+                
+                img.src = blobUrl;
             });
         }
         
-        // Override all file loading methods
-        function overrideFileLoading() {
-            // 1. Override fetch API
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options) {
-                console.log(`Fetch intercepted: ${url}`);
-                
-                // Check if this is a request for a texture file
-                if (typeof url === 'string') {
-                    // Extract the filename from the URL
-                    const filename = url.split('/').pop();
-                    
-                    // Check if we have this file in our virtual file system
-                    if (window.virtualFileSystem[filename]) {
-                        console.log(`Serving ${filename} from virtual file system`);
-                        return new Response(window.virtualFileSystem[filename].blob, {
-                            headers: { 'Content-Type': 'image/png' }
-                        });
-                    }
-                }
-                
-                // Default: pass through to the original fetch
-                return originalFetch.apply(this, arguments);
-            };
+        // Patch all WebAssembly imports related to textures
+        async function patchWasmImports() {
+            // Store the original WebAssembly.instantiate methods
+            const originalInstantiate = WebAssembly.instantiate;
+            const originalInstantiateStreaming = WebAssembly.instantiateStreaming;
             
-            // 2. Override XMLHttpRequest
-            const originalXHROpen = XMLHttpRequest.prototype.open;
-            XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-                console.log(`XMLHttpRequest intercepted: ${url}`);
+            // Override instantiate to intercept and modify imports
+            WebAssembly.instantiate = async function(bufferSource, importObject) {
+                console.log('WebAssembly.instantiate intercepted', importObject);
                 
-                // Check if this is a request for a texture file
-                if (typeof url === 'string') {
-                    // Extract the filename from the URL
-                    const filename = url.split('/').pop();
-                    
-                    // Check if we have this file in our virtual file system
-                    if (window.virtualFileSystem[filename]) {
-                        console.log(`Serving ${filename} from virtual file system via XHR`);
+                if (importObject && importObject.env) {
+                    // Add our texture functions to the environment
+                    importObject.env = {
+                        ...importObject.env,
                         
-                        // Store the filename for later
-                        this._interceptedFile = filename;
+                        // Texture loading function
+                        load_texture: function(path_ptr, path_len) {
+                            console.log('load_texture called with path_ptr:', path_ptr, 'path_len:', path_len);
+                            return window.textureData;
+                        },
                         
-                        // Call the original open with the object URL
-                        return originalXHROpen.call(this, method, window.virtualFileSystem[filename].url, async, user, password);
-                    }
+                        // Texture path function
+                        get_texture_path: function() {
+                            console.log('get_texture_path called');
+                            return window.textureData?.url || '';
+                        },
+                        
+                        // Generic file loading
+                        load_file: function(path_ptr, path_len) {
+                            console.log('load_file called');
+                            return window.textureData;
+                        },
+                        
+                        // Direct JS function to get texture data
+                        js_get_texture_data: function() {
+                            console.log('js_get_texture_data called');
+                            return window.textureData;
+                        }
+                    };
                 }
                 
-                // Default: pass through to the original open
-                return originalXHROpen.apply(this, arguments);
+                // Call the original instantiate
+                return originalInstantiate.apply(this, arguments);
             };
             
-            // 3. Create global utility functions
-            window.getTexturePath = function(filename) {
-                if (window.virtualFileSystem[filename]) {
-                    return window.virtualFileSystem[filename].url;
-                }
-                return null;
-            };
-            
-            window.loadTexture = function(filename) {
-                if (window.virtualFileSystem[filename]) {
-                    return window.virtualFileSystem[filename].image;
-                }
-                return null;
+            // Also override instantiateStreaming
+            WebAssembly.instantiateStreaming = async function(source, importObject) {
+                console.log('WebAssembly.instantiateStreaming intercepted');
+                
+                // Convert streaming to a buffer first, then use our patched instantiate
+                const response = await source;
+                const buffer = await response.arrayBuffer();
+                return WebAssembly.instantiate(buffer, importObject);
             };
         }
         
-        // Main application initialization
-        async function run() {
-            try {
-                document.getElementById('status').textContent = 'Status: Setting up virtual file system...';
-                
-                // Set up our virtual file system
-                await setupVirtualFileSystem();
-                document.getElementById('status').textContent = 'Status: Virtual file system ready. Loading WebAssembly...';
-                
-                try {
-                    // Initialize the WASM module
-                    await init(wasmPath);
-                    document.getElementById('status').textContent = 'Status: WebAssembly module loaded.';
+        // Intercept all network requests that might load textures
+        function interceptNetworkRequests() {
+            // 1. Intercept fetch API
+            const originalFetch = window.fetch;
+            window.fetch = function(resource, options) {
+                if (resource && typeof resource === 'string') {
+                    console.log(`Fetch intercepted: ${resource}`);
                     
-                    // Get the canvas
+                    // Check if we're fetching a texture
+                    const isTextureFetch = TEXTURE_NAMES.some(name => resource.includes(name));
+                    if (isTextureFetch) {
+                        console.log(`Texture fetch detected: ${resource}`);
+                        
+                        // Create a response from our cached texture
+                        const blob = new Blob(
+                            [new Uint8Array(atob(BASE64_TEXTURE).split('').map(c => c.charCodeAt(0)))], 
+                            { type: 'image/png' }
+                        );
+                        
+                        return Promise.resolve(new Response(blob, { 
+                            status: 200, 
+                            headers: { 'Content-Type': 'image/png' }
+                        }));
+                    }
+                }
+                
+                // Pass through to original fetch for non-texture requests
+                return originalFetch.apply(this, arguments);
+            };
+            
+            // 2. Intercept XMLHttpRequest
+            const originalOpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                if (url && typeof url === 'string') {
+                    console.log(`XMLHttpRequest.open intercepted: ${url}`);
+                    
+                    // Check if this is a texture request
+                    const isTextureRequest = TEXTURE_NAMES.some(name => url.includes(name));
+                    if (isTextureRequest) {
+                        console.log(`Texture XHR detected: ${url}`);
+                        this._isTextureRequest = true;
+                        
+                        // Redirect to our blob URL
+                        return originalOpen.call(
+                            this, 
+                            method, 
+                            window.textureData.url, 
+                            async === undefined ? true : async, 
+                            user, 
+                            password
+                        );
+                    }
+                }
+                
+                // Pass through to original open
+                return originalOpen.apply(this, arguments);
+            };
+            
+            // 3. Intercept Image loading
+            const originalImageSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+            if (originalImageSrc && originalImageSrc.set) {
+                Object.defineProperty(HTMLImageElement.prototype, 'src', {
+                    set: function(url) {
+                        if (url && typeof url === 'string') {
+                            console.log(`Image.src intercepted: ${url}`);
+                            
+                            // Check if this is a texture load
+                            const isTextureLoad = TEXTURE_NAMES.some(name => url.includes(name));
+                            if (isTextureLoad) {
+                                console.log(`Texture image load detected: ${url}`);
+                                
+                                // Use our texture blob URL instead
+                                url = window.textureData.url;
+                            }
+                        }
+                        
+                        // Call the original setter
+                        originalImageSrc.set.call(this, url);
+                    },
+                    get: originalImageSrc.get
+                });
+            }
+            
+            // 4. Provide global helpers for texture access
+            window.getTexturePath = function(name) {
+                console.log(`getTexturePath called with: ${name}`);
+                return window.texturePaths[name] || window.textureData.url;
+            };
+            
+            window.getTextureData = function(name) {
+                console.log(`getTextureData called with: ${name}`);
+                return window.textureCache[name] || window.textureData;
+            };
+            
+            window.getTextureElement = function(name) {
+                console.log(`getTextureElement called with: ${name}`);
+                return window.textureData.image;
+            };
+            
+            // Also attach to window.wasm for direct access
+            window.wasm = {
+                textureData: function() { return window.textureData; },
+                texturePath: function(name) { return window.getTexturePath(name); }
+            };
+        }
+        
+        // Main initialization function
+        async function initializeApplication() {
+            try {
+                document.getElementById('status').textContent = 'Status: Setting up texture data...';
+                
+                // 1. First set up our textures
+                await setupTextures();
+                document.getElementById('status').textContent = 'Status: Texture data ready.';
+                
+                // 2. Patch WebAssembly imports to inject our texture handlers
+                await patchWasmImports();
+                document.getElementById('status').textContent = 'Status: WebAssembly imports patched.';
+                
+                // 3. Intercept network requests
+                interceptNetworkRequests();
+                document.getElementById('status').textContent = 'Status: Network interception enabled.';
+                
+                // 4. Initialize the WASM module with all our preparations
+                try {
+                    document.getElementById('status').textContent = 'Status: Loading WebAssembly module...';
+                    
+                    // Initialize with our texture data directly attached
+                    // This allows the module to access it via JavaScript imports
+                    const initResult = await init(wasmPath);
+                    console.log('WASM init result:', initResult);
+                    
+                    document.getElementById('status').textContent = 'Status: WebAssembly loaded. Setting up canvas...';
+                    
+                    // Set up the canvas
                     const canvas = document.getElementById('canvas');
                     canvas.width = canvas.clientWidth;
                     canvas.height = canvas.clientHeight;
                     
+                    // Modify the initialize function to handle textures
+                    const originalInitialize = initialize;
+                    window.customInitialize = async function(canvas) {
+                        console.log('Custom initialize called with texture data available');
+                        
+                        // Try to directly inject our texture data
+                        try {
+                            // Check if it accepts a second parameter for texture data
+                            return await originalInitialize(canvas, window.textureData);
+                        } catch (e) {
+                            console.log('Initialize with texture data failed, trying standard initialize');
+                            return await originalInitialize(canvas);
+                        }
+                    };
+                    
                     // Initialize the WebGL context
                     document.getElementById('status').textContent = 'Status: Initializing WebGL...';
                     try {
-                        // Initialize the WebGL context
-                        const result = await initialize(canvas);
-                        if (result) {
+                        // Call our custom initialize with texture data
+                        const result = await window.customInitialize(canvas);
+                        console.log('WebGL initialization result:', result);
+                        
+                        if (result === true) {
+                            // Start the render loop
                             document.getElementById('status').textContent = 'Status: WebGL initialized. Starting render loop...';
                             
-                            // Start the render loop
                             try {
                                 start_render_loop();
                                 document.getElementById('status').textContent = 'Status: Render loop started successfully!';
                             } catch (e) {
-                                document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
                                 console.error('Error starting render loop:', e);
+                                document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
                             }
                         } else {
-                            document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGL.';
+                            document.getElementById('status').textContent = 'Status: WebGL initialization failed.';
                         }
                     } catch (e) {
-                        document.getElementById('status').textContent = `Status: Error initializing WebGL: ${e.message || e}`;
                         console.error('Error initializing WebGL:', e);
+                        document.getElementById('status').textContent = `Status: Error initializing WebGL: ${e.message || e}`;
                     }
                 } catch (e) {
-                    document.getElementById('status').textContent = `Status: Error loading WebAssembly module: ${e.message || e}`;
-                    console.error('Error loading WebAssembly module:', e);
+                    console.error('Error loading WebAssembly:', e);
+                    document.getElementById('status').textContent = `Status: Error loading WebAssembly: ${e.message || e}`;
                 }
             } catch (e) {
-                document.getElementById('status').textContent = `Status: Error setting up virtual file system: ${e.message || e}`;
-                console.error('Error setting up virtual file system:', e);
+                console.error('Setup error:', e);
+                document.getElementById('status').textContent = `Status: Setup error: ${e.message || e}`;
             }
         }
         
@@ -595,8 +760,8 @@ pub fn start_render_loop() -> Result<(), JsValue> {
             }
         });
         
-        // Run the application
-        run();
+        // Start the application
+        initializeApplication();
     </script>
     
     <!-- Clipboard notification element -->
