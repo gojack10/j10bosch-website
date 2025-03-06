@@ -401,205 +401,192 @@ pub fn start_render_loop() -> Result<(), JsValue> {
         // Import the JavaScript module
         import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
 
-        // Embedded fallback texture (a simple colored grid pattern)
-        const EMBEDDED_TEXTURE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QEBDCkno+e+kAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAnElEQVQ4y2P8//8/AyWAiYFCQLEBLMic9PT0/0xMTEzR0dH/09PTwWxvb28GJiYmBgYGBhj/PwMDw38MDAwM8fHx/xn+fF5icO7oLX5vRbEVE5jPyMj4n5GR8T8yMjJYPD09nYGRkZEBFL0wxv///xnCw8P/MwIV/P//n+HPnz//GRgYGNjY2P5zcXH9Z2Bg+A8SRwasrKz/SQpESg0AAF6jQNLCuS/fAAAAAElFTkSuQmCC';
+        /**
+         * This is a completely different approach to solving the texture loading issue:
+         * 
+         * 1. Create an embedded texture as a base64 string
+         * 2. Convert it to a Blob
+         * 3. Create an Object URL from the Blob
+         * 4. Intercept all network requests and redirect texture requests to the Object URL
+         * 
+         * This approach works even without a local server because it uses the browser's
+         * internal object URL system instead of trying to load from the file system.
+         */
 
-        // Override the module's imports before initialization
-        // This is a way to patch the WASM module to handle texture loading
-        async function patchWasmImports() {
-            // Store the original WebAssembly.instantiate
-            const originalInstantiate = WebAssembly.instantiate;
+        // Embedded fallback texture (simple colored checkerboard pattern)
+        const BASE64_TEXTURE = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5gMYEDsfj4N/OQAABm1JREFUWMOtl21sU9cZx3/n3Gvn2o6dN+clJCYJIUAWlhdaKAF1UNEK1A+VukrVNE3dF7ZJ+zB13aa1X5C6D5u0SWxT2w9Tx6RKadUOKKulYwxYCZSXhkAIIQl5cRKc2I5j3+u3c/ZhJA2ksVvGI13pvno8z+/8zvM/z3kE/8dSSiHE7+XH86aiAhSGocySF9UQlzABqTXFe5qLKTKKSVEAWiuE+L4Qv/2bYbpqLEvKdEanpqL+ihLZ1Njg31BT7asLBKRwu4QCUFojJVi2ZnxiLt0/MBE/c+HW1etDM/GyUv+fP3jvtR9a1sIMflpCqxUBRO41MTVtTyRmFQDKEIQqSoQBvD0wnl6xptJdWiLd4Xdm7MrKcplKZXVLc5kABJ+8P9TzxZNtVZ+cjVm9V2LZF14/fPVDYAVzQXPCFm0e6U4bhPQ/vqPJt6VQhNaanmtT+r1/j9haK1lWYqj1tYFUe1uFu/F+ZGdvTNuLV2a9f8OWm86enLzjOnkmRkVF4OTrL2/8rGUJO66JWAe7e6fXP/tKV1CIgjwUpg2H350S123bgwJ8XiHLy0xl25rIWJKGVWXi5sispTVaQrLX4+rN0ZSkp6dXHz8xRFVVye/efGXz1ge1YADoODwkXn5tqC4YdO1aSlwAly5PiB9/N1yXmEuxdGgEMBGJi/Xry1bvfbba9+iGSvdcJitv9I3Zho5MxG8G696+eF9sSQCt4fjpCdeHJ+KrCohLoLdvhnRaIcTSUZHAhp8cCra+82FPNJ3OzlpQJCUlhXJNJj2b3usawu9zx371cstUQQAp4eqNZBGfAMdJFF1wBdDz9zs0Nfocy8bljIjDYdjuTDqLEOTt24Iuv/zFugk7kcwCeXPP40QKs6IAi76lbMl8s4GiMg0iVc4HfRIHUJZXLFwD30/MHzdKQAhRlDiA41C0G7XG0UUuahAtQdPQmixmUqwgSKUUm9pCRY9OYUt3tzs0jzZLMQCbWqqKHovSSVlwRBoLOeYJ6MRsdikrGN5Mm3Tt+nBvrnbzW3gw0HvP9Xc/8PlczmLHBbTWGMX2npAuKI4Xq5DfSZ4JXYeviEw6ha2LnQALwQPRXR5gzsIAstkscRGgvGI1Ho9Z1Kgp8+I5JeCUg/AgTBfSMJGGmWtSEwHYtk00MUznyROM3Y04QoIQCGHg9Qd5dNs2nnv+OWrq1xQFkErZ+L05gGQyyfvHP+DQwYOYrSZqw2rwer1orZmensZ2bKqqqmhpaVkGIGcnThw9ymxihl279+D3+xf9x2YT/OLAAdatW8e+ffsIh8ML74QQjzYTSil6e3s5cuQI3/rOt9m2bduCJ5/Px549e2huvp8n3/ve93j3b+/Q3t6O18zZ/sT8rYhEIrz11lsMDg2ybft2Nm/eTGVlJQCHDx/mR/teorpulJGRC3R3R1i9uoYdO3bQ1NTEwMAAXV1dfOPFb9La2rpAlFIKwzCIxWJ89NFHrFtTx/Hjx7kz/TlCCJRStLW1cfjQYerr64lGoxw8+DpnT58inUrjL/Xz5JNPsXPnTurq6h4CmJiYoLOzk1QqxbPPPktjY+OiZxeAYRhkMhnS6TSmaRIMBuno6ODs2bN0dHSQTCYJh8OsWbNmcQ5YlsXIyAg+n4/du3cXJM6XaZpUV1fjOA6xWIzBwUHi8ThKKZqamti6dSulpaWPAKTTaRzHoa6uDq/X+0Bkent7c0nY3LwwT+rq6qirq1uWvMfjoa2tjXQ6TSwWw+fzLQB8aR4YhoFlWQgh8Pv9y5LTWnPu3DkuXbpEfX09L7zwPIcOHeLcuXOsW7eOF198kbKysmVzwTAMKisr0VoTCAQeCXzho10ul9vtdnPmzBn2799PZWUl1dXVnD9/nt///g+sWrWKffv2EQqFCgLMVwEAj8eDz+dbDHrfe7Esy7Ftm/Xr1/Pmm29y9epVpqameHX/fu7evUsmk6G7u5tYLEZNTU1BgAcPzJ2FJQ6GsiyrvLy8nFQqxepQiJaWFpRSXL58GcdxkFIyNjaGaZpEo1Ha2tpIJpNFASilsG0bwzCW3KSWlZVtbG5u/nNXVxcBv5/+/n4ikQjhcJiamhpisRiJRIJoNMqVK1d47bXX2LhxI36/n2QyiWVZOI5TkHyeffmXFHCUUn8UQryjlHJyj6NSqZT6QzKZ/GE8Hv9aMpnkvwGC75A4z4KMqQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMi0wMy0yNFQxNjoxMTozMSswMDowMJ7GGII5RQY5AAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIyLTAzLTI0VDE2OjExOjMxKzAwOjAw8PoJ/QAAAABJRkVpOXIpTA==';
+        
+        // This will hold our object URL for the texture
+        let textureObjectUrl = null;
+        
+        // Create a texture from base64 data
+        function createTextureFromBase64() {
+            // Convert base64 to binary
+            const binaryString = atob(BASE64_TEXTURE);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
             
-            // Override instantiate to patch imports
-            WebAssembly.instantiate = async function(buffer, importObject) {
-                // If importObject exists, we can patch its imports
-                if (importObject && importObject.env) {
-                    // Save original functions if they exist
-                    const originalLoadTexture = importObject.env.load_texture;
-                    const originalGetTexturePath = importObject.env.get_texture_path;
-                    
-                    // Override texture loading functions
-                    if (typeof originalLoadTexture === 'function') {
-                        importObject.env.load_texture = function(...args) {
-                            console.log('Intercepted load_texture call with args:', args);
-                            // Redirect to our embedded texture
-                            return window.textureData || null;
-                        };
-                    }
-                    
-                    if (typeof originalGetTexturePath === 'function') {
-                        importObject.env.get_texture_path = function(...args) {
-                            console.log('Intercepted get_texture_path call with args:', args);
-                            // Return our embedded data URI
-                            return EMBEDDED_TEXTURE;
-                        };
-                    }
-                    
-                    // Add a custom texture loading function
-                    importObject.env.js_load_texture = function(path_ptr, path_len) {
-                        console.log('js_load_texture called');
-                        return window.textureData || null;
-                    };
-                }
-                
-                // Call the original instantiate
-                return originalInstantiate(buffer, importObject);
-            };
-        }
-
-        // Convert an image to a data URL
-        function imageToDataUrl(img) {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            return canvas.toDataURL('image/png');
+            // Create a blob from the binary data
+            const blob = new Blob([bytes], { type: 'image/png' });
+            
+            // Create an object URL from the blob
+            textureObjectUrl = URL.createObjectURL(blob);
+            
+            console.log(`Created texture object URL: ${textureObjectUrl}`);
+            return textureObjectUrl;
         }
         
-        // Load a texture from a Data URI
-        async function loadTextureFromDataUri(dataUri) {
+        // Set up a virtual file system for textures
+        function setupVirtualFileSystem() {
+            // Create our texture object URL
+            const textureUrl = createTextureFromBase64();
+            
+            // Create an image element and preload the texture
+            const img = new Image();
+            img.src = textureUrl;
+            
+            // Wait for the image to load
             return new Promise((resolve, reject) => {
-                const img = new Image();
                 img.onload = () => {
-                    try {
-                        // Create a canvas to get pixel data
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        
-                        // Get raw pixel data
-                        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-                        
-                        // Store in global for the WebAssembly module to access
-                        window.textureData = {
-                            data: imageData.data,
-                            width: img.width,
-                            height: img.height,
-                            dataUrl: dataUri
-                        };
-                        
-                        // Set up multiple texture access methods
-                        window.textureSrc = dataUri;
-                        window.textureImage = img;
-                        window.textureCanvas = canvas;
-                        
-                        resolve(window.textureData);
-                    } catch (e) {
-                        reject(e);
-                    }
+                    // Store texture information in global variables
+                    window.virtualFileSystem = {
+                        'block.png': {
+                            url: textureUrl,
+                            blob: new Blob([new Uint8Array(atob(BASE64_TEXTURE).split('').map(c => c.charCodeAt(0)))], { type: 'image/png' }),
+                            image: img
+                        }
+                    };
+                    
+                    // Override all methods that might be used to load files
+                    overrideFileLoading();
+                    resolve();
                 };
                 img.onerror = reject;
-                img.src = dataUri;
             });
         }
-
+        
+        // Override all file loading methods
+        function overrideFileLoading() {
+            // 1. Override fetch API
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                console.log(`Fetch intercepted: ${url}`);
+                
+                // Check if this is a request for a texture file
+                if (typeof url === 'string') {
+                    // Extract the filename from the URL
+                    const filename = url.split('/').pop();
+                    
+                    // Check if we have this file in our virtual file system
+                    if (window.virtualFileSystem[filename]) {
+                        console.log(`Serving ${filename} from virtual file system`);
+                        return new Response(window.virtualFileSystem[filename].blob, {
+                            headers: { 'Content-Type': 'image/png' }
+                        });
+                    }
+                }
+                
+                // Default: pass through to the original fetch
+                return originalFetch.apply(this, arguments);
+            };
+            
+            // 2. Override XMLHttpRequest
+            const originalXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                console.log(`XMLHttpRequest intercepted: ${url}`);
+                
+                // Check if this is a request for a texture file
+                if (typeof url === 'string') {
+                    // Extract the filename from the URL
+                    const filename = url.split('/').pop();
+                    
+                    // Check if we have this file in our virtual file system
+                    if (window.virtualFileSystem[filename]) {
+                        console.log(`Serving ${filename} from virtual file system via XHR`);
+                        
+                        // Store the filename for later
+                        this._interceptedFile = filename;
+                        
+                        // Call the original open with the object URL
+                        return originalXHROpen.call(this, method, window.virtualFileSystem[filename].url, async, user, password);
+                    }
+                }
+                
+                // Default: pass through to the original open
+                return originalXHROpen.apply(this, arguments);
+            };
+            
+            // 3. Create global utility functions
+            window.getTexturePath = function(filename) {
+                if (window.virtualFileSystem[filename]) {
+                    return window.virtualFileSystem[filename].url;
+                }
+                return null;
+            };
+            
+            window.loadTexture = function(filename) {
+                if (window.virtualFileSystem[filename]) {
+                    return window.virtualFileSystem[filename].image;
+                }
+                return null;
+            };
+        }
+        
+        // Main application initialization
         async function run() {
             try {
-                document.getElementById('status').textContent = 'Status: Setting up environment...';
+                document.getElementById('status').textContent = 'Status: Setting up virtual file system...';
                 
-                // Try to patch WASM imports
-                await patchWasmImports();
+                // Set up our virtual file system
+                await setupVirtualFileSystem();
+                document.getElementById('status').textContent = 'Status: Virtual file system ready. Loading WebAssembly...';
                 
-                // Load the embedded texture
                 try {
-                    await loadTextureFromDataUri(EMBEDDED_TEXTURE);
-                    document.getElementById('status').textContent = 'Status: Embedded texture loaded successfully!';
-                } catch (e) {
-                    console.error('Error loading embedded texture:', e);
-                    document.getElementById('status').textContent = 'Status: Failed to load embedded texture. Continuing anyway...';
-                }
-                
-                // Initialize the WASM module with the explicit path
-                try {
+                    // Initialize the WASM module
                     await init(wasmPath);
-                    document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
-                } catch (e) {
-                    console.error('Error initializing WASM module:', e);
-                    document.getElementById('status').textContent = `Status: Error loading WASM module: ${e.message || e}`;
-                    return; // Stop if we can't load the WASM module
-                }
-                
-                // Set up multiple global variables the WebAssembly module might be looking for
-                window.textureLoaded = true;
-                window.texturePath = EMBEDDED_TEXTURE;
-                window.assetPath = '';
-                window.imageCache = {
-                    'block.png': window.textureImage
-                };
-                
-                // Create a global function for the WebAssembly to call
-                window.loadImage = (path) => {
-                    console.log(`loadImage called with path: ${path}`);
-                    return window.textureImage || null;
-                };
-                
-                // Ensure WebAssembly fetch is redirected to our embedded texture
-                const originalFetch = window.fetch;
-                window.fetch = async function(url, options) {
-                    if (url && typeof url === 'string' && url.includes('block.png')) {
-                        console.log(`Intercepted fetch for texture: ${url}`);
-                        const response = new Response(
-                            await fetch(EMBEDDED_TEXTURE).then(r => r.blob()),
-                            { headers: { 'Content-Type': 'image/png' } }
-                        );
-                        return response;
-                    }
-                    return originalFetch.apply(this, arguments);
-                };
-                
-                // Get the canvas element
-                const canvas = document.getElementById('canvas');
-                
-                // Set the canvas size to match display size
-                canvas.width = canvas.clientWidth;
-                canvas.height = canvas.clientHeight;
-                
-                // Inject a custom method into the initialize function
-                const originalInitialize = initialize;
-                window.initialize = async function(canvas) {
-                    console.log('Custom initialize called');
-                    // Pass our embedded texture data
-                    return originalInitialize(canvas, window.textureData);
-                };
-                
-                // Initialize the application with better error handling
-                try {
-                    // Try to initialize
-                    const result = await window.initialize(canvas);
-                    if (result) {
-                        document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
-                        
-                        // Start the render loop
-                        try {
-                            start_render_loop();
-                            document.getElementById('status').textContent = 'Status: Render loop started successfully with embedded texture!';
-                        } catch (e) {
-                            document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
-                            console.error('Error starting render loop:', e);
-                        }
-                    } else {
-                        document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGPU.';
-                    }
-                } catch (e) {
-                    // Try to get more info about the error
-                    let errorDetails = e.message || String(e);
-                    if (e.stack) {
-                        console.error('Error stack:', e.stack);
-                    }
+                    document.getElementById('status').textContent = 'Status: WebAssembly module loaded.';
                     
-                    document.getElementById('status').textContent = `Status: Error initializing: ${errorDetails}`;
-                    console.error('Error initializing:', e);
+                    // Get the canvas
+                    const canvas = document.getElementById('canvas');
+                    canvas.width = canvas.clientWidth;
+                    canvas.height = canvas.clientHeight;
+                    
+                    // Initialize the WebGL context
+                    document.getElementById('status').textContent = 'Status: Initializing WebGL...';
+                    try {
+                        // Initialize the WebGL context
+                        const result = await initialize(canvas);
+                        if (result) {
+                            document.getElementById('status').textContent = 'Status: WebGL initialized. Starting render loop...';
+                            
+                            // Start the render loop
+                            try {
+                                start_render_loop();
+                                document.getElementById('status').textContent = 'Status: Render loop started successfully!';
+                            } catch (e) {
+                                document.getElementById('status').textContent = `Status: Error starting render loop: ${e.message || e}`;
+                                console.error('Error starting render loop:', e);
+                            }
+                        } else {
+                            document.getElementById('status').textContent = 'Status: Initialization failed. Your browser may not support WebGL.';
+                        }
+                    } catch (e) {
+                        document.getElementById('status').textContent = `Status: Error initializing WebGL: ${e.message || e}`;
+                        console.error('Error initializing WebGL:', e);
+                    }
+                } catch (e) {
+                    document.getElementById('status').textContent = `Status: Error loading WebAssembly module: ${e.message || e}`;
+                    console.error('Error loading WebAssembly module:', e);
                 }
             } catch (e) {
-                document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;
-                console.error('Error:', e);
+                document.getElementById('status').textContent = `Status: Error setting up virtual file system: ${e.message || e}`;
+                console.error('Error setting up virtual file system:', e);
             }
         }
-
-        // Handle window resize to update canvas size
+        
+        // Handle window resize
         window.addEventListener('resize', () => {
             const canvas = document.getElementById('canvas');
             if (canvas) {
@@ -607,7 +594,8 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 canvas.height = canvas.clientHeight;
             }
         });
-
+        
+        // Run the application
         run();
     </script>
     
