@@ -401,29 +401,133 @@ pub fn start_render_loop() -> Result<(), JsValue> {
         // Import the JavaScript module
         import init, { initialize, start_render_loop } from './demos/gpu-acceleration/pkg/gpu_acceleration_test.js';
 
+        // Override the module's imports before initialization
+        // This is a way to patch the WASM module to handle texture loading
+        async function patchWasmImports() {
+            // Store the original WebAssembly.instantiate
+            const originalInstantiate = WebAssembly.instantiate;
+            
+            // Override instantiate to patch imports
+            WebAssembly.instantiate = async function(buffer, importObject) {
+                // If importObject exists, we can patch its imports
+                if (importObject && importObject.env) {
+                    // Save original functions if they exist
+                    const originalLoadTexture = importObject.env.load_texture;
+                    const originalGetTexturePath = importObject.env.get_texture_path;
+                    
+                    // Override texture loading functions
+                    if (typeof originalLoadTexture === 'function') {
+                        importObject.env.load_texture = function(...args) {
+                            console.log('Intercepted load_texture call with args:', args);
+                            // Redirect to our preloaded texture
+                            return window.textureData || null;
+                        };
+                    }
+                    
+                    if (typeof originalGetTexturePath === 'function') {
+                        importObject.env.get_texture_path = function(...args) {
+                            console.log('Intercepted get_texture_path call with args:', args);
+                            return './demos/gpu-acceleration/assets/textures/block.png';
+                        };
+                    }
+                    
+                    // Add a custom texture loading function
+                    importObject.env.js_load_texture = function(path_ptr, path_len) {
+                        console.log('js_load_texture called');
+                        return window.textureData || null;
+                    };
+                }
+                
+                // Call the original instantiate
+                return originalInstantiate(buffer, importObject);
+            };
+        }
+
+        // Convert an image to a data URL
+        function imageToDataUrl(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Preload the texture and convert to a format WebAssembly can use
+        async function preloadTexture() {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        // Create a canvas to get pixel data
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Get raw pixel data
+                        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                        
+                        // Store in global for the WebAssembly module to access
+                        window.textureData = {
+                            data: imageData.data,
+                            width: img.width,
+                            height: img.height,
+                            dataUrl: imageToDataUrl(img)
+                        };
+                        
+                        // Set up multiple texture access methods
+                        window.textureSrc = img.src;
+                        window.textureImage = img;
+                        window.textureCanvas = canvas;
+                        
+                        resolve(window.textureData);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                img.onerror = reject;
+                
+                // Try multiple paths
+                img.src = './demos/gpu-acceleration/assets/textures/block.png';
+            });
+        }
+
         async function run() {
             try {
-                // Disable the texture interception - it's causing infinite recursion
-                // Instead, let's load the texture globally first
-                const texturePath = './demos/gpu-acceleration/assets/textures/block.png';
+                document.getElementById('status').textContent = 'Status: Preloading texture...';
+                
+                // Try to patch WASM imports
+                await patchWasmImports();
+                
+                // Preload the texture first
                 try {
-                    // Preload the texture
-                    const img = new Image();
-                    img.src = texturePath;
-                    await new Promise((resolve, reject) => {
-                        img.onload = resolve;
-                        img.onerror = reject;
-                    });
-                    console.log(`Preloaded texture: ${img.width}x${img.height}`);
-                    window.preloadedTexture = img;
+                    await preloadTexture();
+                    document.getElementById('status').textContent = 'Status: Texture preloaded successfully!';
                 } catch (e) {
-                    console.warn('Failed to preload texture:', e);
+                    console.error('Error preloading texture:', e);
+                    document.getElementById('status').textContent = 'Status: Failed to preload texture. Continuing anyway...';
                 }
                 
                 // Initialize the WASM module with the explicit path
                 await init(wasmPath);
                 
                 document.getElementById('status').textContent = 'Status: WebAssembly module loaded. Initializing...';
+                
+                // Set up multiple global variables the WebAssembly module might be looking for
+                window.textureLoaded = true;
+                window.texturePath = './demos/gpu-acceleration/assets/textures/block.png';
+                window.assetPath = './demos/gpu-acceleration/assets/';
+                window.imageCache = {
+                    'block.png': window.textureImage
+                };
+                
+                // Create a global function for the WebAssembly to call
+                window.loadImage = (path) => {
+                    console.log(`loadImage called with path: ${path}`);
+                    return window.textureImage || null;
+                };
                 
                 // Get the canvas element
                 const canvas = document.getElementById('canvas');
@@ -432,14 +536,18 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                 canvas.width = canvas.clientWidth;
                 canvas.height = canvas.clientHeight;
                 
-                // Add a global texture path - this is what the WebAssembly module is likely looking for
-                window.texturePath = texturePath;
-                window.assetPath = './demos/gpu-acceleration/assets/';
+                // Inject a custom method into the initialize function
+                const originalInitialize = initialize;
+                window.initialize = async function(canvas) {
+                    console.log('Custom initialize called');
+                    // Pass our preloaded texture
+                    return originalInitialize(canvas, window.textureData);
+                };
                 
                 // Initialize the application with better error handling
                 try {
                     // Try to initialize
-                    const result = await initialize(canvas);
+                    const result = await window.initialize(canvas);
                     if (result) {
                         document.getElementById('status').textContent = 'Status: Initialization successful. Starting render loop...';
                         
@@ -464,8 +572,10 @@ pub fn start_render_loop() -> Result<(), JsValue> {
                     document.getElementById('status').textContent = `Status: Error initializing: ${errorDetails}`;
                     console.error('Error initializing:', e);
                     
-                    // Give user a hint about using a local server
-                    document.getElementById('status').textContent += '\n\nTry running with a local server: python3 -m http.server';
+                    // Add more detailed debugging
+                    document.getElementById('status').textContent += 
+                        '\n\nThis may be due to a CORS issue or how file paths are resolved when not using a local server.' + 
+                        '\n\nTry running with a local server: python3 -m http.server';
                 }
             } catch (e) {
                 document.getElementById('status').textContent = `Status: Error: ${e.message || e}`;
