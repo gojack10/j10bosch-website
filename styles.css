@@ -323,12 +323,12 @@ md-block:not(:defined) {
 .code-block {
   background-color: #1a1b26;
   color: #c0caf5;
-  padding: 20px;
+  padding: 16px;
   padding-top: 10px;
   border-radius: 6px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1;
   display: block;
   position: relative;
   overflow-x: hidden; /* Prevent horizontal scrolling on the container */
@@ -358,6 +358,7 @@ md-block:not(:defined) {
 .code-line {
   display: block;
   padding-left: 0;
+  margin: 0;
 }
 
 .code-line.indented {
@@ -446,6 +447,8 @@ code {
   color: inherit;
   background: none;
   white-space: pre;
+  margin: 0;
+  padding: 0;
 }
 
 /* Syntax highlighting */

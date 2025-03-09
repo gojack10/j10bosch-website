@@ -139,6 +139,7 @@ function convertCodeBlocks() {
     // Create a content wrapper for the code
     const contentWrapper = document.createElement('div');
     contentWrapper.style.overflow = 'auto';
+    contentWrapper.style.lineHeight = '1'; // Match the CSS line-height
     
     // Process content line by line
     const lines = content.split('\n');
@@ -152,6 +153,8 @@ function convertCodeBlocks() {
       
       const codeLine = document.createElement('span');
       codeLine.className = 'code-line';
+      codeLine.style.margin = '0'; // Ensure no margin
+      codeLine.style.padding = '0'; // Ensure no padding
       
       // Check if line starts with spaces or tabs for indentation
       if (line.match(/^(\s+)/)) {
@@ -165,7 +168,9 @@ function convertCodeBlocks() {
       
       // Add line break except for the last line
       if (i < lines.length - 1) {
-        contentWrapper.appendChild(document.createElement('br'));
+        const lineBreak = document.createElement('br');
+        lineBreak.style.margin = '0'; // Ensure no margin on line breaks
+        contentWrapper.appendChild(lineBreak);
       }
     }
     
